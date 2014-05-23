@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/plainbg"
+    android:orientation="vertical" >
+        <TextView
+            android:id="@+id/titleView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Twerk Fest"
+            android:gravity="center"
+            android:background="@drawable/headerbg"
+            android:textColor="#FFF"
+            android:textSize="58sp" />
+
+        <TextView
+            android:id="@+id/partyCreator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="By Hugh Roberts"
+            android:textColor="#060606"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/realDateView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Oct 10 2011"
+            android:textColor="#FFF"
+            android:textSize="38sp" />
+
+        <Button
+            android:id="@+id/attendingButton"
+            android:layout_width="332dp"
+            android:layout_height="wrap_content"
+            android:onClick="markAttending"
+            android:text="Mark as Attending" />
+
+        <TextView
+            android:id="@+id/durationTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="10 min left"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000"
+            android:textSize="38sp" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/line" />
+
+        <TextView
+            android:id="@+id/descrip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Come by to get fucked up, fuck some thots, n hopefully comeup off a drunk bitch iPhone. Or if your a lame, then come watch niggas like me do the things i just previously listed. Either way, should be a wonderful night to witness!!"
+            android:textColor="#060606"
+            android:textSize="18sp" />
+
+</LinearLayout>
