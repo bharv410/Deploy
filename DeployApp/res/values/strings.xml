@@ -7,5 +7,6 @@
     <string name="title_activity_home_screen">HomeScreen</string>
     <string name="title_activity_event_details">EventDetails</string>
     <string name="title_activity_contacts_list">ContactsList</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
 
 </resources>

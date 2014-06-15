@@ -37,17 +37,12 @@
             android:name="com.kidgeniusdesigns.deployapp.MainActivity"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.kidgeniusdesigns.deployapp.HomeScreen"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         </activity>
-        <activity
-            android:name="com.kidgeniusdesigns.deployapp.EventHome">
+        <activity android:name="com.kidgeniusdesigns.deployapp.EventHome" >
         </activity>
 
         <meta-data
@@ -64,9 +59,24 @@
             android:label="@string/title_activity_contacts_list"
             android:windowSoftInputMode="stateHidden" >
         </activity>
-        <uses-library android:required="true" android:name="com.google.android.maps" />
-        <activity android:name="com.kidgeniusdesigns.deployapp.CreatorDetailsActivity"
-            android:windowSoftInputMode="stateHidden">
+
+        <uses-library
+            android:name="com.google.android.maps"
+            android:required="true" />
+
+        <activity
+            android:name="com.kidgeniusdesigns.deployapp.CreatorDetailsActivity"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        <activity
+            android:name="com.kidgeniusdesigns.realdeploy.SplashScreen"
+            android:label="@string/title_activity_splash_screen"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
