@@ -2,7 +2,6 @@ package com.kidgeniusdesigns.deployapp;
 
 import java.net.MalformedURLException;
 import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
+import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
@@ -53,6 +52,7 @@ public class HomeScreen extends Activity{
 	public void goToEvent(View v) {	
 		enteredCode = eventCode.getText().toString();
 		eventCode.setText("");
+		
 		if (enteredCode != null && !enteredCode.equals("")) {
 			//drops keyboard
 			InputMethodManager inputManager = (InputMethodManager) this
@@ -151,5 +151,56 @@ public class HomeScreen extends Activity{
 						}
 					});
 		}
+	}
+	public void eventDetails(View v){
+		enteredCode = eventCode.getText().toString();
+		eventCode.setText("");
+		editItem(enteredCode);
+	}
+public void editItem(String eventCode) {
+		
+		mToDoTable.where().field("eventcode").eq(eventCode)
+				.execute(new TableQueryCallback<Events>() {
+
+					public void onCompleted(List<Events> result, int count,
+							Exception exception, ServiceFilterResponse response) {
+						if (exception == null) {
+							if (result.size() < 1) {
+								Toast toast = Toast.makeText(
+										getApplicationContext(),
+										"Invalid Event Id", Toast.LENGTH_LONG);
+								toast.setGravity(Gravity.TOP
+										| Gravity.CENTER_HORIZONTAL, 0, 0);
+								toast.show();
+							} else {
+								Intent i = new Intent(getApplicationContext(),
+										CreatorDetailsActivity.class);
+								Events cur;
+								for (Events res : result) {
+									if(!res.getOwnerId().equals(MainActivity.username)){
+										Toast toast = Toast.makeText(
+												getApplicationContext(),
+												"Invalid code", Toast.LENGTH_LONG);
+										toast.setGravity(Gravity.TOP
+												| Gravity.CENTER_HORIZONTAL, 0, 0);
+										toast.show();
+										return;
+									}
+									cur = res;
+									i.putExtra("title", cur.getTitle());
+									i.putExtra("location", cur.getLocation());
+									i.putExtra("eventtime", cur.getTime());
+									i.putExtra("code", cur.getEventCode());
+									i.putExtra("creator", cur.getOwnerId());
+									i.putExtra("descrip", cur.getDescrip());
+									i.putExtra("username", getIntent().getStringExtra("username"));
+									startActivity(i);
+								}
+							}
+						} else {
+							System.out.println("Error finding item");
+						}
+					}
+				});
 	}
 }

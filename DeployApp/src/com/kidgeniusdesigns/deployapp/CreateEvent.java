@@ -9,11 +9,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -30,9 +28,9 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
+import com.kidgeniusdesigns.realdeploy.R;
 //import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 //import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;

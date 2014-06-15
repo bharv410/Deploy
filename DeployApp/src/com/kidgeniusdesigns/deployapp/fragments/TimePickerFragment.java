@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.TimePicker;
 
 import com.kidgeniusdesigns.deployapp.CreateEvent;
-import com.kidgeniusdesigns.deployapp.R;
+import com.kidgeniusdesigns.realdeploy.R;
 
 public class TimePickerFragment extends DialogFragment
 implements TimePickerDialog.OnTimeSetListener {

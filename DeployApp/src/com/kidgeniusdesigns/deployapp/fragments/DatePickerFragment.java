@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 
 import com.kidgeniusdesigns.deployapp.CreateEvent;
-import com.kidgeniusdesigns.deployapp.R;
+import com.kidgeniusdesigns.realdeploy.R;
 
 public class DatePickerFragment extends DialogFragment
 implements DatePickerDialog.OnDateSetListener {

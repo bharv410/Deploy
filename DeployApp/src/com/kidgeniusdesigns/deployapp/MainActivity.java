@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,6 +16,7 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
+import com.kidgeniusdesigns.realdeploy.R;
 
 public class MainActivity extends FragmentActivity implements
 		ConnectionCallbacks, OnConnectionFailedListener, View.OnClickListener {
@@ -34,15 +34,6 @@ public class MainActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		//testing purposes
-		Intent i=new Intent(this, HomeScreen.class);
-		i.putExtra("username", "Swaggy P");
-		i.putExtra("userid", "Harvey Dent");
-		username="Harvey Dent";
-		startActivity(i);
-		
-		
 		mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
 		mSignInButton.setOnClickListener(this);
 		if (savedInstanceState != null) {
@@ -95,8 +86,9 @@ public class MainActivity extends FragmentActivity implements
 		mSignInButton.setEnabled(false);
 
 		Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+		username=currentUser.getDisplayName();
 		Toast toast=Toast.makeText(getApplicationContext(),
-				"Welcome " + currentUser.getDisplayName(), Toast.LENGTH_LONG);
+				"Welcome " + username, Toast.LENGTH_LONG);
 		
 		toast.setGravity(Gravity.CENTER, 0, -150);
 		toast.show();

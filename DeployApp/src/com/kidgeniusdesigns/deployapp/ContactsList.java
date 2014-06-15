@@ -1,94 +1,148 @@
 package com.kidgeniusdesigns.deployapp;
 
 import java.util.ArrayList;
-
-import android.app.ListActivity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
+import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import com.kidgeniusdesigns.realdeploy.R;
 
+public class ContactsList extends Fragment {
 
-public class ContactsList extends ListActivity {
+	String message;
+	MyCustomAdapter dataAdapter = null;
+	public static ArrayList<Contact> ctcs;
 
-	ArrayList<String> contactNames;
-	ArrayList<String> contactNums;
-	String eventCode,message;
-	EditText messageBox;
-	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_contacts_list);
-		setTitle("Invite Some People");
-		Intent intent = getIntent();
-		eventCode=intent.getStringExtra("eventcode");
-		
-		messageBox=(EditText)findViewById(R.id.messageEditText);
-		message="I'm having a private party! Download 'Deploy' from Play Store. When it opens type '"
-				+ eventCode +"' for the info!";
-		messageBox.setText(message);
-		
-		contactNames = new ArrayList<String>();	
-		contactNums = new ArrayList<String>();
-		getContacts();
-		
-		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-		        R.layout.simplest_list_item, contactNames);
-		    setListAdapter(adapter);
-		    
-		    Toast.makeText(getApplicationContext(), "Created Event now tell some ppl", Toast.LENGTH_LONG).show();
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		View rootView = inflater.inflate(R.layout.activity_contacts_list,
+				container, false);
+		return rootView;
 	}
+
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		String phoneNum=contactNums.get(position);
-		String nam=contactNames.get(position);
-		message=messageBox.getText().toString();
-		Toast.makeText(getApplicationContext(), "Sent to: " + nam, Toast.LENGTH_SHORT).show();
-		//SmsManager smsManager = SmsManager.getDefault();
-		//smsManager.sendTextMessage(phoneNo, null, message, null, null);	
-		
+	public void onActivityCreated(Bundle saved) {
+		super.onActivityCreated(saved);
+		ctcs = getContacts();
+		// create an ArrayAdaptar from the String Array
+		dataAdapter = new MyCustomAdapter(
+				getActivity().getApplicationContext(),
+				R.layout.rowbuttonlayout, ctcs);
+		ListView listView = (ListView) getActivity().findViewById(
+				R.id.listView1);
+		// Assign adapter to ListView
+		listView.setAdapter(dataAdapter);
 	}
-	
-	private void getContacts() {
-		Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
-		while (phones.moveToNext())
-		{
-			String contctName=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-			contactNames.add(contctName);
-			try{
-			contactNums.add(getPhoneNumber(contctName,getApplicationContext()));
-			}catch(SQLiteException e){
-				e.printStackTrace();
+
+	private ArrayList<Contact> getContacts() {
+		ArrayList<Contact> contacts = new ArrayList<Contact>();
+
+		Cursor phones = getActivity().getContentResolver().query(
+				ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null,
+				null, null);
+		while (phones.moveToNext()) {
+			try {
+				String contctName = phones
+						.getString(phones
+								.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+				String contctNumb = getPhoneNumber(contctName, getActivity()
+						.getApplicationContext());
+				contacts.add(new Contact(contctName, contctNumb));
+			} catch (SQLiteException e) {
 			}
 		}
 		phones.close();
-	  }
-
-	public void goHome(View v){
-		startActivity(new Intent(this, HomeScreen.class));
+		contacts.add(new Contact("Dummy", ""));
+		contacts.add(new Contact("Dummy2", ""));
+		return contacts;
 	}
+
 	public String getPhoneNumber(String name, Context context) {
 		String ret = null;
-		String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" like'%" + name +"%'";
-		String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER};
-		Cursor c = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-		        projection, selection, null, null);
+		String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+				+ " like'%" + name + "%'";
+		String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER };
+		Cursor c = context.getContentResolver().query(
+				ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection,
+				selection, null, null);
 		if (c.moveToFirst()) {
-		    ret = c.getString(0);
+			ret = c.getString(0);
 		}
 		c.close();
-		if(ret==null)
-		    ret = "Unsaved";
+		if (ret == null)
+			ret = "Unsaved";
 		return ret;
+	}
+
+	private class MyCustomAdapter extends ArrayAdapter<Contact> {
+
+		private ArrayList<Contact> contactList;
+
+		public MyCustomAdapter(Context context, int textViewResourceId,
+				ArrayList<Contact> contactList) {
+			super(context, textViewResourceId, contactList);
+			this.contactList = new ArrayList<Contact>();
+			this.contactList.addAll(contactList);
 		}
 
+		private class ViewHolder {
+			TextView code;
+			CheckBox name;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+
+			ViewHolder holder = null;
+			Log.v("ConvertView", String.valueOf(position));
+
+			if (convertView == null) {
+				LayoutInflater vi = (LayoutInflater) getActivity()
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = vi.inflate(R.layout.rowbuttonlayout, null);
+
+				holder = new ViewHolder();
+				holder.code = (TextView) convertView.findViewById(R.id.label);
+				holder.name = (CheckBox) convertView.findViewById(R.id.check);
+				convertView.setTag(holder);
+
+				holder.name.setOnClickListener(new View.OnClickListener() {
+					public void onClick(View v) {
+						CheckBox cb = (CheckBox) v;
+						Contact contact = (Contact) cb.getTag();
+						Toast.makeText(
+								getActivity().getApplicationContext(),
+								" " + cb.getText() + " is "
+										+ cb.isChecked(), Toast.LENGTH_LONG)
+								.show();
+						contact.setChecked(cb.isChecked());
+					}
+				});
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+
+			Contact contact = (Contact) getItem(position);
+			holder.code.setText(contact.getName());
+			holder.name.setChecked(contact.isChecked());
+			holder.name.setTag(contact);
+
+			return convertView;
+
+		}
+
+	}
 }

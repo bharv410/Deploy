@@ -13,7 +13,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.kidgeniusdesigns.deployapp.EventHome;
-import com.kidgeniusdesigns.deployapp.R;
+import com.kidgeniusdesigns.realdeploy.R;
  
 public class MapFragment extends Fragment {
 
@@ -83,10 +83,8 @@ public void onViewCreated(View view, Bundle savedInstanceState) {
             setUpMap();
     }
 }
+/*
 
-/**** The mapfragment's id must be removed from the FragmentManager
- **** or else if the same it is passed on the next time then 
- **** app will crash ****/
 @Override
 public void onDestroyView() {
     super.onDestroyView();
@@ -96,4 +94,5 @@ public void onDestroyView() {
         mMap = null;
     }
 }
+*/
 }

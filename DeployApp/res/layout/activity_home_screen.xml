@@ -59,4 +59,13 @@
         android:layout_below="@+id/button1"
         android:src="@drawable/or" />
 
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/editbutton"
+        android:onClick="eventDetails" />
+
 </RelativeLayout>

@@ -3,7 +3,6 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Locale;
-
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -17,9 +16,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Toast;
-
 import com.bugsense.trace.BugSenseHandler;
 import com.google.android.maps.GeoPoint;
+import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Attendee;
 import com.kidgeniusdesigns.deployapp.fragments.EventInfo;
 import com.kidgeniusdesigns.deployapp.fragments.TabsPagerAdapter;

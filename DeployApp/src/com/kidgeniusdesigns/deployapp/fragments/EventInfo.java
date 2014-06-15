@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.kidgeniusdesigns.deployapp.EventHome;
-import com.kidgeniusdesigns.deployapp.R;
+import com.kidgeniusdesigns.realdeploy.R;
  
 public class EventInfo extends Fragment {
 	static TextView partyCountdown, titleView, descrView, dateView, creatorView, startTimeView;
