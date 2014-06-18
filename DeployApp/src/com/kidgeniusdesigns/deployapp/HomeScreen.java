@@ -2,7 +2,9 @@ package com.kidgeniusdesigns.deployapp;
 
 import java.net.MalformedURLException;
 import java.util.List;
+
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -154,9 +157,14 @@ public class HomeScreen extends Activity{
 	}
 	public void eventDetails(View v){
 		enteredCode = eventCode.getText().toString();
-		eventCode.setText("");
-		editItem(enteredCode);
-	}
+		if(enteredCode.equals("")){
+			displayPopUp();
+			return;
+		}else{
+			eventCode.setText("");
+			editItem(enteredCode);
+		}
+}
 public void editItem(String eventCode) {
 		
 		mToDoTable.where().field("eventcode").eq(eventCode)
@@ -166,24 +174,14 @@ public void editItem(String eventCode) {
 							Exception exception, ServiceFilterResponse response) {
 						if (exception == null) {
 							if (result.size() < 1) {
-								Toast toast = Toast.makeText(
-										getApplicationContext(),
-										"Invalid Event Id", Toast.LENGTH_LONG);
-								toast.setGravity(Gravity.TOP
-										| Gravity.CENTER_HORIZONTAL, 0, 0);
-								toast.show();
+								displayPopUp();
 							} else {
 								Intent i = new Intent(getApplicationContext(),
 										CreatorDetailsActivity.class);
 								Events cur;
 								for (Events res : result) {
 									if(!res.getOwnerId().equals(MainActivity.username)){
-										Toast toast = Toast.makeText(
-												getApplicationContext(),
-												"Invalid code", Toast.LENGTH_LONG);
-										toast.setGravity(Gravity.TOP
-												| Gravity.CENTER_HORIZONTAL, 0, 0);
-										toast.show();
+										displayPopUp();
 										return;
 									}
 									cur = res;
@@ -203,4 +201,20 @@ public void editItem(String eventCode) {
 					}
 				});
 	}
+
+public void displayPopUp(){
+	
+
+		// 1. Instantiate an AlertDialog.Builder with its constructor
+		AlertDialog.Builder builder = new AlertDialog.Builder(HomeScreen.this);
+
+		// 2. Chain together various setter methods to set the dialog characteristics
+		builder.setMessage("Enter event code of event that you created  so you can edit, send invites, etc")
+		       .setTitle("Event Creator button");
+
+		// 3. Get the AlertDialog from create()
+		AlertDialog dialog = builder.create();
+		dialog.show();
+
+}
 }

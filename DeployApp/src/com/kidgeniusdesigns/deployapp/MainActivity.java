@@ -35,12 +35,12 @@ public class MainActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-//		//dummy username for testing purposes
+		//dummy username for testing purposes
 //		Intent i=new Intent(this, HomeScreen.class);
 //		i.putExtra("username", "Tester tester");
 //		username="Tester tester";
 //		startActivity(i);
-//		
+		
 		
 		
 		mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);

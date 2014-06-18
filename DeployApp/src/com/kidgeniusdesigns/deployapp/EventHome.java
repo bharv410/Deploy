@@ -49,7 +49,6 @@ public class EventHome extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		ActionBar bar = getActionBar();
-		bar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#005500")));
 		bar.setTitle("DEPLOY");
 		BugSenseHandler.initAndStartSession(EventHome.this, "d76061ee");
 		final ActionBar actionBar = getActionBar();
@@ -121,38 +120,7 @@ public class EventHome extends FragmentActivity {
 					"com.google.android.maps.MapsActivity");
 			startActivity(intent);
 		} else {
-//			// show dialog
-//			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-//					getApplicationContext());
-//			// set title
-//			alertDialogBuilder.setTitle("Directions Not Available until 8 hrs prior");
-//
-//			// set dialog message
-//			alertDialogBuilder
-//					.setMessage("This is for security so we can ensure your event remains private.")
-//					.setCancelable(false)
-//					.setPositiveButton("Yes",
-//							new DialogInterface.OnClickListener() {
-//								public void onClick(DialogInterface dialog,
-//										int id) {
-//									// if this button is clicked, just close
-//									// the dialog box and do nothing
-//									dialog.cancel();
-//								}
-//							})
-//					.setNegativeButton("No",
-//							new DialogInterface.OnClickListener() {
-//								public void onClick(DialogInterface dialog,
-//										int id) {
-//									// if this button is clicked, just close
-//									// the dialog box and do nothing
-//									dialog.cancel();
-//								}
-//							});
-//			// create alert dialog
-//			AlertDialog alertDialog = alertDialogBuilder.create();
-//			// show it
-//			alertDialog.show();
+
 			// 1. Instantiate an AlertDialog.Builder with its constructor
 			AlertDialog.Builder builder = new AlertDialog.Builder(EventHome.this);
 
