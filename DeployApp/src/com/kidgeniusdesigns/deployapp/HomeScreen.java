@@ -1,6 +1,7 @@
 package com.kidgeniusdesigns.deployapp;
 
 import java.net.MalformedURLException;
+import java.util.Calendar;
 import java.util.List;
 
 import android.app.Activity;
@@ -8,6 +9,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -24,6 +26,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class HomeScreen extends Activity{
@@ -95,6 +98,28 @@ public class HomeScreen extends Activity{
 								Events cur;
 								for (Events res : result) {
 									cur = res;
+									Calendar c = Calendar.getInstance();
+									long millisToday = c.getTimeInMillis();
+									long tilEvent = (long) (cur.getTime() - millisToday);
+									//if event passed then exit
+									if(tilEvent<0){
+									//if event has passed then delete it
+									mToDoTable.delete(cur, new TableDeleteCallback() {
+								        public void onCompleted(Exception exception,
+								                                ServiceFilterResponse response) {
+								            if(exception == null){
+								                Log.i("CHeck", "Object deleted");
+								                Toast toast = Toast.makeText(
+														getApplicationContext(),
+														"Invalid Event Id", Toast.LENGTH_LONG);
+												toast.setGravity(Gravity.TOP
+														| Gravity.CENTER_HORIZONTAL, 0, 0);
+												toast.show();
+								            }
+								        }
+								    });
+									}else{
+									
 									i.putExtra("title", cur.getTitle());
 									i.putExtra("location", cur.getLocation());
 									i.putExtra("eventtime", cur.getTime());
@@ -103,6 +128,7 @@ public class HomeScreen extends Activity{
 									i.putExtra("descrip", cur.getDescrip());
 									i.putExtra("username", getIntent().getStringExtra("username"));
 									startActivity(i);
+									}
 								}
 							}
 						} else {

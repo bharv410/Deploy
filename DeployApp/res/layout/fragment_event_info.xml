@@ -1,99 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/eventbg"
+    android:background="@drawable/eventsbg"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/titleView"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/attendingButton"
+        android:layout_width="332dp"
+        android:layout_height="70dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/attendingbg"
+        android:onClick="markAttending" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:fontFamily="sans-serif-condensed"
-        android:gravity="center"
-        android:text="Twerk Fest"
-        android:textColor="#000"
-        android:textSize="38sp" />
+        android:background="@drawable/headr"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/titleView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:text="Deploy Release"
+            android:textColor="#000"
+            android:textSize="38sp" />
+
+        <TextView
+            android:id="@+id/partyCreator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Ben Harvey"
+            android:textColor="#060606"
+            android:textSize="24sp" />
+
+        <ImageView
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/line" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/distLogo"
+        android:layout_width="45dp"
+        android:layout_height="46dp"
+        android:layout_alignLeft="@+id/etaLogo"
+        android:layout_below="@+id/linearLayout1"
+        android:paddingLeft="16dp"
+        android:src="@drawable/distancelogo" />
 
     <TextView
-        android:id="@+id/partyCreator"
-        android:layout_width="match_parent"
+        android:id="@+id/realDateView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="By Hugh Roberts"
-        android:textColor="#060606"
-        android:textSize="24sp" />
+        android:layout_alignBottom="@+id/distLogo"
+        android:layout_centerHorizontal="true"
+        android:text="Oct 10 2011"
+        android:textColor="#000"
+        android:textSize="26sp" />
+
+    <ImageView
+        android:id="@+id/etaLogo"
+        android:layout_width="44dp"
+        android:layout_height="46dp"
+        android:layout_below="@+id/distLogo"
+        android:layout_toLeftOf="@+id/realDateView"
+        android:paddingLeft="16dp"
+        android:src="@drawable/etalogo" />
+
+    <TextView
+        android:id="@+id/durationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/etaLogo"
+        android:layout_toRightOf="@+id/distLogo"
+        android:text="10 min left"
+        android:textColor="#000"
+        android:textSize="26sp" />
 
     <ImageView
         android:id="@+id/line2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/line" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <ImageView
-            android:id="@+id/etaLogo"
-            android:layout_width="45dp"
-            android:layout_height="46dp"
-            android:paddingLeft="16dp"
-            android:src="@drawable/etalogo" />
-
-        <TextView
-            android:id="@+id/durationTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10 min left"
-            android:textColor="#000"
-            android:textSize="26sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <ImageView
-            android:id="@+id/distLogo"
-            android:layout_width="45dp"
-            android:layout_height="46dp"
-            android:paddingLeft="16dp"
-            android:src="@drawable/distancelogo" />
-
-        <TextView
-            android:id="@+id/realDateView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Oct 10 2011"
-            android:textColor="#000"
-            android:textSize="26sp" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/line1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/etaLogo"
         android:src="@drawable/line" />
 
     <TextView
         android:id="@+id/descrip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/etaLogo"
+        android:layout_below="@+id/line2"
         android:gravity="center"
-        android:text="Come by to get fucked up, fuck some thots, n hopefully comeup off a drunk bitch iPhone. Or if your a lame, then come watch niggas like me do the things i just previously listed. Either way, should be a wonderful night to witness!!"
+        android:text="Come by for a fine evening of wining and dining while ordourvs are served by the waitress and waiters of your choice"
         android:textColor="#060606"
         android:textSize="22sp" />
 
-    <Button
-        android:id="@+id/attendingButton"
-        android:layout_width="332dp"
-        android:layout_height="wrap_content"
-        android:onClick="markAttending"
-        android:text="Mark as Attending" />
-
-</LinearLayout>
+</RelativeLayout>

@@ -9,10 +9,8 @@ import java.util.concurrent.TimeUnit;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -25,10 +23,10 @@ import android.widget.Toast;
 
 import com.bugsense.trace.BugSenseHandler;
 import com.google.android.maps.GeoPoint;
-import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Attendee;
 import com.kidgeniusdesigns.deployapp.fragments.EventInfo;
 import com.kidgeniusdesigns.deployapp.fragments.TabsPagerAdapter;
+import com.kidgeniusdesigns.realdeploy.R;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
@@ -49,7 +47,6 @@ public class EventHome extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		ActionBar bar = getActionBar();
-		bar.setTitle("DEPLOY");
 		BugSenseHandler.initAndStartSession(EventHome.this, "d76061ee");
 		final ActionBar actionBar = getActionBar();
 		setContentView(R.layout.activity_event_home);
@@ -59,6 +56,7 @@ public class EventHome extends FragmentActivity {
 		pager.setAdapter(pageAdapter);
 		Intent intent = getIntent();
 		title = intent.getStringExtra("title");
+		bar.setTitle(title);
 		creator = intent.getStringExtra("creator");
 		eventCode = intent.getStringExtra("code");
 		eventLocation = intent.getStringExtra("location");
@@ -100,7 +98,7 @@ public class EventHome extends FragmentActivity {
 				getActionBar().setSelectedNavigationItem(position);
 			}
 		});
-
+		setAttending(" checkedin");
 	}
 
 	public void startRoute(View v) {
@@ -108,8 +106,24 @@ public class EventHome extends FragmentActivity {
 		long millisToday = c.getTimeInMillis();
 		long tilEvent = cd - millisToday;
 		long hoursLeft = TimeUnit.MILLISECONDS.toHours(tilEvent);
-		if (hoursLeft <= 8) {
+		if (hoursLeft >= 8) {
+			// 1. Instantiate an AlertDialog.Builder with its constructor
+						AlertDialog.Builder builder = new AlertDialog.Builder(EventHome.this);
 
+						// 2. Chain together various setter methods to set the dialog characteristics
+						builder.setMessage("This is for security so we can ensure your event remains private.")
+						       .setTitle("Directions Not Available until 8 hrs prior");
+
+						// 3. Get the AlertDialog from create()
+						AlertDialog dialog = builder.create();
+						dialog.show();
+		} else if(hoursLeft<0){
+			AlertDialog.Builder builder = new AlertDialog.Builder(EventHome.this);
+			builder.setMessage("This is for security so we can ensure your event remains private.")
+			       .setTitle("Directions Not Available anymore");
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		}else{
 			double lat = eventLatLng.getLatitudeE6() / 1E6;
 			double lng = eventLatLng.getLongitudeE6() / 1E6;
 			String uri = String.format(Locale.ENGLISH,
@@ -119,19 +133,6 @@ public class EventHome extends FragmentActivity {
 			intent.setClassName("com.google.android.apps.maps",
 					"com.google.android.maps.MapsActivity");
 			startActivity(intent);
-		} else {
-
-			// 1. Instantiate an AlertDialog.Builder with its constructor
-			AlertDialog.Builder builder = new AlertDialog.Builder(EventHome.this);
-
-			// 2. Chain together various setter methods to set the dialog characteristics
-			builder.setMessage("This is for security so we can ensure your event remains private.")
-			       .setTitle("Directions Not Available until 8 hrs prior");
-
-			// 3. Get the AlertDialog from create()
-			AlertDialog dialog = builder.create();
-			dialog.show();
-			
 		}
 
 	}
@@ -167,8 +168,13 @@ public class EventHome extends FragmentActivity {
 
 	public void markAttending(View v) {
 
-		Toast.makeText(getApplicationContext(), "attending", Toast.LENGTH_LONG)
+		Toast.makeText(getApplicationContext(), "You are attending", Toast.LENGTH_LONG)
 				.show();
+		EventInfo.atButton.setClickable(false);
+		setAttending(" attend");
+	}
+	
+	private void setAttending(String goingOrCheckedIn){
 		try {
 			mClient = new MobileServiceClient(
 					"https://droiddemo.azure-mobile.net/",
@@ -176,15 +182,13 @@ public class EventHome extends FragmentActivity {
 			mAttendeeTable = mClient.getTable(Attendee.class);
 			Attendee newAttendee = new Attendee();
 			newAttendee.setEventCode(eventCode);
-			newAttendee.setAttendee(getIntent().getStringExtra("username"));
+			newAttendee.setAttendee(getIntent().getStringExtra("username")+goingOrCheckedIn);
 			mAttendeeTable.insert(newAttendee,
 					new TableOperationCallback<Attendee>() {
 						public void onCompleted(Attendee entity,
 								Exception exception,
 								ServiceFilterResponse response) {
 							if (exception == null) {
-								EventInfo.atButton.setTextColor(Color.GRAY);
-								EventInfo.atButton.setClickable(false);
 
 							} else {
 								// Insert failed
