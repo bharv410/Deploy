@@ -10,7 +10,6 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -199,6 +198,16 @@ public class EventHome extends FragmentActivity {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void goToCal(View v){
+		Intent intent = new Intent(Intent.ACTION_EDIT);  
+		intent.setType("vnd.android.cursor.item/event");
+		intent.putExtra("title", title);
+		intent.putExtra("description", "Don't forget. Deply code is " + eventCode);
+		intent.putExtra("beginTime", intent.getDoubleExtra("eventtime", 0.0));
+		startActivity(intent);
+		
 	}
 
 }

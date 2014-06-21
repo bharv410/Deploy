@@ -7,11 +7,11 @@
 
     <Button
         android:id="@+id/attendingButton"
-        android:layout_width="332dp"
-        android:layout_height="70dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@+id/textView1"
         android:background="@drawable/attendingbg"
         android:onClick="markAttending" />
 
@@ -22,7 +22,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/headr"
         android:orientation="vertical" >
 
         <TextView
@@ -32,7 +31,7 @@
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
             android:text="Deploy Release"
-            android:textColor="#000"
+            android:textColor="#FFF"
             android:textSize="38sp" />
 
         <TextView
@@ -41,7 +40,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Ben Harvey"
-            android:textColor="#060606"
+            android:textColor="#FFF"
             android:textSize="24sp" />
 
         <ImageView
@@ -67,7 +66,7 @@
         android:layout_alignBottom="@+id/distLogo"
         android:layout_centerHorizontal="true"
         android:text="Oct 10 2011"
-        android:textColor="#000"
+        android:textColor="#FFF"
         android:textSize="26sp" />
 
     <ImageView
@@ -86,7 +85,7 @@
         android:layout_alignBottom="@+id/etaLogo"
         android:layout_toRightOf="@+id/distLogo"
         android:text="10 min left"
-        android:textColor="#000"
+        android:textColor="#FFF"
         android:textSize="26sp" />
 
     <ImageView
@@ -97,15 +96,39 @@
         android:layout_below="@+id/etaLogo"
         android:src="@drawable/line" />
 
-    <TextView
-        android:id="@+id/descrip"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/etaLogo"
-        android:layout_below="@+id/line2"
-        android:gravity="center"
-        android:text="Come by for a fine evening of wining and dining while ordourvs are served by the waitress and waiters of your choice"
-        android:textColor="#060606"
-        android:textSize="22sp" />
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/line2" >
+
+        <TextView
+            android:id="@+id/descrip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Come by for a fine evening of wining and dining while ordourvs are served by the waitress and waiters of your choice"
+            android:textColor="#FFF"
+            android:textSize="22sp" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/calendarButton"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignBottom="@+id/attendingButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/attendingButton"
+        android:layout_toRightOf="@+id/textView1"
+        android:background="@drawable/calendarbutton"
+        android:onClick="goToCal" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="                                          " />
 
 </RelativeLayout>

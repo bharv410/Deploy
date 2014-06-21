@@ -9,9 +9,13 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
@@ -28,14 +32,15 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
-import com.kidgeniusdesigns.realdeploy.R;
 //import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 //import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.kidgeniusdesigns.deployapp.fragments.TimePickerFragment;
+import com.kidgeniusdesigns.realdeploy.R;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
@@ -54,6 +59,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 	private ProgressBar mProgressBar;
 	String partyTime;
 	ValidationManager mValidationManager;
+	String[] titleHints, codeHints, locHints, descripHints;
 	
 	private static final String LOG_TAG = "GooglePlaces";
 	private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
@@ -66,10 +72,40 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_event);
 		CreateEvent.tilEvent = Calendar.getInstance();
+		titleHints= new String[5];
+		codeHints= new String[5];
+		locHints= new String[5];
+		descripHints= new String[5];
+			titleHints[0]="Ben's Album Release";
+			titleHints[1]="Exclusive Diner";
+			titleHints[2]="Meet-and-Greet";
+			titleHints[3]="Meet me at Wawas";
+			codeHints[0]="example: bensalbrel213";
+			codeHints[1]="example: jaysdiner22";
+			codeHints[2]="example: secretgreet115";
+			codeHints[3]="example: wawas323";
+			locHints[0]="123 Motown Street Detrot, MI";
+			locHints[1]="555 Jay Diner Way Dayton, OH";
+			locHints[2]="5600 Starbuck lane, Los Angeles CA";
+			locHints[3]="Wawas Hickory Ridge Road Columbia, MD";
+			descripHints[0]="Come hear a sneak preview of my new album. Don't tell anyone the code bc they won't get in. I can see whoever views the details";
+		descripHints[1]="Thanks for attending our conference. You've been invited to our post-event dinner. Follow Deploy's instructions to make your way to our secret location.";
+			descripHints[2]="You are one of the few that hold the event code to meet with our surprise music artist who has agreed to sign some autographs.";
+			descripHints[3]="Whats up bud. Could you drop the kids off at wawas. Easily get directions or add to your calendar through this app.";
+			
+			
 		eventTitle = (EditText) findViewById(R.id.eventTitle);
+		
 		eventCode = (EditText) findViewById(R.id.eventCode);
+		
 		locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
+		
 		descripBox= (EditText) findViewById(R.id.descriptBox);
+		
+		
+		
+		
+		
 		locationBox.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
 		locationBox.setOnItemClickListener(this);
 		eventTitle.requestFocus();
@@ -151,8 +187,33 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 				}
 			}
 		});
-	}
 
+//alarm to notify of creator options
+		AlertDialog.Builder builder = new AlertDialog.Builder(CreateEvent.this);
+		// 2. Chain together various setter methods to set the dialog characteristics
+		builder.setMessage("To edit details \n View Attendees \n Invite Friends")
+		       .setTitle("Click the green gear on the home screen");
+
+		// 3. Get the AlertDialog from create()
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+	@Override
+	public void onResume() {
+	    super.onResume();  // Always call the superclass method first
+	    Random rg = new Random();
+	    int rand=rg.nextInt(4);
+	    System.out.println(String.valueOf(rand));
+	    System.out.println(String.valueOf(rand));
+	    System.out.println(String.valueOf(rand));
+	    System.out.println(String.valueOf(rand));
+	    System.out.println(String.valueOf(rand));
+	    System.out.println(String.valueOf(rand));
+	    eventTitle.setHint(titleHints[rand]);
+	    eventCode.setHint(codeHints[rand]);
+	    locationBox.setHint(locHints[rand]);
+		descripBox.setHint(descripHints[rand]);
+	}
 	private class ProgressFilter implements ServiceFilter {
 
 		@Override
