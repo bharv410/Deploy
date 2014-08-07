@@ -1,0 +1,12 @@
+DeployApp/bin/
+DeployApp/gen/
+DeployApp/proguard-project.txt
+DeployApp/project.properties
+
+*.class
+*.o
+*.exe
+*.dll
+*.cache
+*.dex
+*.apk
