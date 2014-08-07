@@ -2,17 +2,21 @@
 
 ### Eclipse ###
 *.pydevproject
-.metadata
-.gradle
-bin/
-tmp/
+DeployApp/.metadata
+DeployApp/.gradle
+DeployApp/bin/
+DeployApp/tmp/
 *.tmp
 *.bak
 *.swp
 *~.nib
-local.properties
-.settings/
-.loadpath
+DeployApp/local.properties
+DeployApp/.settings/
+DeployApp/.loadpath
+DeployApp/.classpath
+DeployApp/.project
+DeployApp/project.properties
+DeployApp/proguard-project.txt
 
 # External tool builders
 .externalToolBuilders/
@@ -77,8 +81,8 @@ com_crashlytics_export_strings.xml
 *.class
 
 # Generated files
-bin/
-gen/
+DeployApp/bin/
+DeployApp/gen/
 
 # Gradle files
 .gradle/
@@ -103,10 +107,3 @@ gradle-app.setting
 
 ### Project specific ###
 DeployApp/homeActivity/
-DeployApp/gen/
-DeployApp/bin/
-DeployApp/.settings/
-DeployApp/proguard-project.txt
-DeployApp/project.properties
-DeployApp/.project
-DeployApp/.classpath
