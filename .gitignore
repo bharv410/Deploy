@@ -2,6 +2,8 @@ DeployApp/bin/
 DeployApp/gen/
 DeployApp/proguard-project.txt
 DeployApp/project.properties
+DeployApp/.project
+DeployApp/.classpath
 
 *.class
 *.o
