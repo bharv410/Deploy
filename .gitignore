@@ -105,6 +105,7 @@ gradle-app.setting
 DeployApp/homeActivity/
 DeployApp/gen/
 DeployApp/bin/
+DeployApp/.settings/
 DeployApp/proguard-project.txt
 DeployApp/project.properties
 DeployApp/.project
