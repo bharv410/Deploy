@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
-//import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
-//import com.coreform.open.android.formidablevalidation.ValidationManager;
+import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
+import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.kidgeniusdesigns.deployapp.fragments.TimePickerFragment;
@@ -111,7 +111,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 		eventTitle.requestFocus();
 		mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
 		mProgressBar.setVisibility(ProgressBar.GONE);
-
+		
 		try {
 			mClient = new MobileServiceClient(
 					"https://droiddemo.azure-mobile.net/",
@@ -121,6 +121,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 		} catch (Exception e) {
 			System.out.print("Coudnt get table");
 		}
+		
 		mValidationManager = new ValidationManager(this);
 		mValidationManager
 				.add("eventTitleError", new RegExpressionValueValidator(
@@ -134,26 +135,36 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 	
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         String str = (String) adapterView.getItemAtPosition(position);
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+        
+        // replaced this reference with getApplicationContext()
+        
+        // this reference can lead to memory leaks if not careful
+        
+        // garbage collector will not free memory if this reference is used
     }
-
+	
+	public void choosePhoto(View v)
+	{
+	    // do something when Choose event photo button is pressed
+	}
+	
 	public void showDatePickerDialog(View v) {
 		DialogFragment newFragment = new DatePickerFragment();
 		newFragment.show(getFragmentManager(), "datePicker");
 	}
-
+	
 	public void showTimePickerDialog(View v) {
 		DialogFragment newFragment = new TimePickerFragment();
 		newFragment.show(getFragmentManager(), "timePicker");
 	}
-
+	
 	public void saveEvent(View v) {
 		if (mValidationManager.validateAllAndSetError()) {
 			addItem();
+		}
 	}
-
-	}
-
+	
 	public void addItem() {
 		String eventLocation = locationBox.getText().toString();
 
@@ -172,6 +183,8 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 		item.setTime(calTime.getTime());
 		if(!descripBox.getText().toString().equals(""))
 			item.setDescrip(descripBox.getText().toString());
+		
+		
 		mToDoTable.insert(item, new TableOperationCallback<Events>() {
 
 			public void onCompleted(Events entity, Exception exception,
@@ -198,6 +211,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
+	
 	@Override
 	public void onResume() {
 	    super.onResume();  // Always call the superclass method first
@@ -214,6 +228,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 	    locationBox.setHint(locHints[rand]);
 		descripBox.setHint(descripHints[rand]);
 	}
+	
 	private class ProgressFilter implements ServiceFilter {
 
 		@Override
@@ -252,6 +267,7 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 					});
 		}
 	}
+	
 	private ArrayList<String> autocomplete(String input) {
 	    ArrayList<String> resultList = null;
 
@@ -349,3 +365,4 @@ public class CreateEvent extends FragmentActivity implements OnItemClickListener
 	    }
 	}
 }
+
