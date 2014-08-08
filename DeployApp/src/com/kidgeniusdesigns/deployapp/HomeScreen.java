@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -41,7 +42,9 @@ public class HomeScreen extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
+        
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -320,8 +323,7 @@ public class HomeScreen extends Activity
                                             cur.getOwnerId());
                                     i.putExtra("descrip",
                                             cur.getDescrip());
-                                    i.putExtra(
-                                            "username",
+                                    i.putExtra("username",
                                             getIntent()
                                                     .getStringExtra(
                                                             "username"));

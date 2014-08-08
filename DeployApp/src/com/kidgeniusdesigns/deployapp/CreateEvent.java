@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -73,7 +74,9 @@ public class CreateEvent extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_create_event);
+        
         CreateEvent.tilEvent = Calendar.getInstance();
         titleHints = new String[5];
         codeHints = new String[5];
