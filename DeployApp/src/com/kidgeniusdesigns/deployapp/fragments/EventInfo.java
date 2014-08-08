@@ -11,7 +11,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.kidgeniusdesigns.deployapp.EventHome;
@@ -21,7 +21,7 @@ public class EventInfo extends Fragment
 {
     static TextView partyCountdown, titleView, descrView,
             dateView, creatorView, startTimeView;
-    public static Button atButton;
+    public static ImageButton atButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -49,7 +49,7 @@ public class EventInfo extends Fragment
         creatorView = (TextView) getActivity().findViewById(
                 R.id.partyCreator);
         creatorView.setText("By:" + EventHome.creator);
-        atButton = (Button) getActivity().findViewById(
+        atButton = (ImageButton) getActivity().findViewById(
                 R.id.attendingButton);
         descrView = (TextView) getActivity().findViewById(
                 R.id.descrip);
