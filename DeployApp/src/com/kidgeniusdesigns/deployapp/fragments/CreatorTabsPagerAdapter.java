@@ -8,29 +8,35 @@ import com.kidgeniusdesigns.deployapp.AttendeesFrag;
 import com.kidgeniusdesigns.deployapp.ContactsList;
 import com.kidgeniusdesigns.deployapp.EditEventFrag;
 
-public class CreatorTabsPagerAdapter extends FragmentPagerAdapter {
-	 
-    public CreatorTabsPagerAdapter(FragmentManager fm) {
-		super(fm);
-	}
+public class CreatorTabsPagerAdapter extends
+        FragmentPagerAdapter
+{
+
+    public CreatorTabsPagerAdapter(FragmentManager fm)
+    {
+        super(fm);
+    }
+
     @Override
-    public Fragment getItem(int index) {
- 
-        switch (index) {
-        case 0:
-        	return new EditEventFrag();
-        case 1:
-        	return (Fragment) new AttendeesFrag();
-        case 2:
-        	return new ContactsList();
-        	}
- 
- 
+    public Fragment getItem(int index)
+    {
+
+        switch (index)
+        {
+            case 0:
+                return new EditEventFrag();
+            case 1:
+                return (Fragment) new AttendeesFrag();
+            case 2:
+                return new ContactsList();
+        }
+
         return null;
     }
- 
+
     @Override
-    public int getCount() {
+    public int getCount()
+    {
         // get item count - equal to number of tabs
         return 3;
     }
