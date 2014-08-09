@@ -18,7 +18,8 @@
         android:ems="10"
         android:gravity="center_horizontal"
         android:hint="Enter Event Code"
-        android:inputType="textPassword" >
+        android:inputType="textPassword"
+        android:textColor="@color/black" >
 
         <requestFocus />
     </EditText>
