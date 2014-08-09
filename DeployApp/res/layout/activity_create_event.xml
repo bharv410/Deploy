@@ -71,24 +71,32 @@
                     android:imeOptions="actionNext"
                     android:inputType="textPassword"
                     android:paddingBottom="5dp" />
-            
+                
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
             
                     <Button
                         android:id="@+id/dateButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
                         android:onClick="showDatePickerDialog"
-                        android:text="Select Date" />
+                        android:text="Select Date"
+                        />
             
                     <Button
                         android:id="@+id/timeButton"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
                         android:onClick="showTimePickerDialog"
-                        android:text="Select Time" />
+                        android:text="Select Time"
+                        />
+                    
+
                 </LinearLayout>
             
                 <AutoCompleteTextView
@@ -132,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="start"
                     android:ems="10"
-                    android:gravity="center_horizontal"
+                    android:gravity="left"
                     android:hint="Optional Description" />
                     
                 
