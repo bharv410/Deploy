@@ -1,6 +1,8 @@
 package com.kidgeniusdesigns.deployapp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -11,6 +13,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,13 +41,10 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
-import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
-import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
@@ -59,9 +65,13 @@ public class CreateEvent extends FragmentActivity implements
 {
     EditText eventTitle, eventCode, descripBox;
     AutoCompleteTextView locationBox;
-    
+
+    // Android Query API for image downloading
     private AQuery aq;
-    
+    // use AsyncTask, possibly long loading time
+    private AsyncTask<Void,Void,String[]> imageNamePullAsyncTask;
+    private String[] imageNameArray;
+
     public static Calendar tilEvent;
     private MobileServiceClient mClient;
     private MobileServiceTable<Events> mToDoTable;
@@ -75,6 +85,7 @@ public class CreateEvent extends FragmentActivity implements
     private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
     private static final String OUT_JSON = "/json";
     private static final String API_KEY = "AIzaSyCgP3QVf6vpoGqZJxlMY84RnYRo_BZ8JbI";
+    private static final String IMAGE_ADDRESS = "http://kidgeniustesting.cloudapp.net/deploy/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -82,7 +93,7 @@ public class CreateEvent extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_create_event);
-        
+
         CreateEvent.tilEvent = Calendar.getInstance();
         titleHints = new String[5];
         codeHints = new String[5];
@@ -109,12 +120,11 @@ public class CreateEvent extends FragmentActivity implements
 
         eventCode = (EditText) findViewById(R.id.eventCode);
         
+        // Android Query API for image downloading
         aq = new AQuery(this);
-        
+
         // use AsyncTask, possibly long loading time
-        new ImagePullAsyncTask().execute("testing.png");
-        
-        // http://kidgeniustesting.cloudapp.net/deploy/images.php
+        imageNamePullAsyncTask = new ImageNamePullAsyncTask().execute();
 
         locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
 
@@ -161,7 +171,24 @@ public class CreateEvent extends FragmentActivity implements
 
     public void choosePhoto(View v)
     {
-        // do something when Choose event photo button is pressed
+        try
+        {
+            imageNameArray = imageNamePullAsyncTask.get();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        if(imageNameArray != null)
+        {
+            for(int i = 0; i < imageNameArray.length; i++)
+            {
+                Log.i("kidgeniustesting", imageNameArray[i]);
+            }
+        }
+        
+        // pass imageNameArray and show pics
     }
 
     public void showDatePickerDialog(View v)
@@ -451,16 +478,96 @@ public class CreateEvent extends FragmentActivity implements
             return filter;
         }
     }
-    
-    public class ImagePullAsyncTask extends AsyncTask<String, Void, Void>
-    {
+
+    /**
+     * Used to download image names from server in background thread
+     * 
+     *
+     */
+    public class ImageNamePullAsyncTask extends
+            AsyncTask<Void, Void, String[]>
+    {   
         @Override
-        protected Void doInBackground(String... args)
+        protected String[] doInBackground(Void... params)
         {
-            aq.id(R.id.eventPhotoImage).image(
-                    "http://kidgeniustesting.cloudapp.net/deploy/images/" + args[0]);
+            String[] imageNames = null;
+
+            try
+            {
+                JSONArray jsonArray = new JSONArray(
+                        getImageNames());
+
+                imageNames = new String[jsonArray.length()];
+
+                for (int i = 0; i < imageNames.length; i++)
+                {
+                    imageNames[i] = jsonArray
+                            .getString(i);
+                    
+                    imageNames[i] = imageNames[i].replace("\\", "");
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return imageNames;
+        }
+        
+        @Override
+        protected void onPostExecute(String[] result)
+        {
+            if(result != null)
+            {
+                Random rg = new Random();
+                int rand = rg.nextInt(result.length);
+                
+                aq.id(R.id.eventPhotoImage).image(
+                        IMAGE_ADDRESS + result[rand]);
+            }
+        }
+
+        private String getImageNames()
+        {
+            StringBuilder builder = new StringBuilder();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(
+                    IMAGE_ADDRESS + "images.php");
+            try
+            {
+                HttpResponse response = client.execute(httpGet);
+                StatusLine statusLine = response
+                        .getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == 200)
+                {
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null)
+                    {
+                        builder.append(line);
+                    }
+                }
+                else
+                {
+                    Log.e("kidgeniustesting",
+                            "Failed to download file");
+                }
+            }
+            catch (ClientProtocolException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
             
-            return null;
+            return builder.toString();
         }
     }
 }
