@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -31,9 +32,11 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.androidquery.AQuery;
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
@@ -56,6 +59,9 @@ public class CreateEvent extends FragmentActivity implements
 {
     EditText eventTitle, eventCode, descripBox;
     AutoCompleteTextView locationBox;
+    
+    private AQuery aq;
+    
     public static Calendar tilEvent;
     private MobileServiceClient mClient;
     private MobileServiceTable<Events> mToDoTable;
@@ -102,6 +108,13 @@ public class CreateEvent extends FragmentActivity implements
         eventTitle = (EditText) findViewById(R.id.eventTitle);
 
         eventCode = (EditText) findViewById(R.id.eventCode);
+        
+        aq = new AQuery(this);
+        
+        // use AsyncTask, possibly long loading time
+        new ImagePullAsyncTask().execute("testing.png");
+        
+        // http://kidgeniustesting.cloudapp.net/deploy/images.php
 
         locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
 
@@ -436,6 +449,18 @@ public class CreateEvent extends FragmentActivity implements
                 }
             };
             return filter;
+        }
+    }
+    
+    public class ImagePullAsyncTask extends AsyncTask<String, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(String... args)
+        {
+            aq.id(R.id.eventPhotoImage).image(
+                    "http://kidgeniustesting.cloudapp.net/deploy/images/" + args[0]);
+            
+            return null;
         }
     }
 }
