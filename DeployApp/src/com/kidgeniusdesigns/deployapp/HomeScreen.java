@@ -8,16 +8,22 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -30,13 +36,15 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
-public class HomeScreen extends Activity
+public class HomeScreen extends Activity implements OnShowcaseEventListener
 {
+    public static final int REQUEST_CODE_CREATE_EVENT = 0;
     private EditText eventCode;
     private MobileServiceClient mClient;
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
+    private ViewGroup homeScreenLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,7 +52,8 @@ public class HomeScreen extends Activity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
-        
+
+        homeScreenLayout = (ViewGroup) findViewById(R.id.homeScreenLayout);
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -211,8 +220,22 @@ public class HomeScreen extends Activity
                 CreateEvent.class);
         i.putExtra("username",
                 getIntent().getStringExtra("username"));
-        startActivity(i);
+        startActivityForResult(i, REQUEST_CODE_CREATE_EVENT);
+        //startActivity(i);
 
+    }
+
+    @Override
+    public void onShowcaseViewHide(ShowcaseView showcaseView) {
+    }
+
+    @Override
+    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+        homeScreenLayout.setAlpha(1.0f);
+    }
+
+    @Override
+    public void onShowcaseViewShow(ShowcaseView showcaseView) {
     }
 
     private class ProgressFilter implements ServiceFilter
@@ -358,4 +381,22 @@ public class HomeScreen extends Activity
         dialog.show();
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_CREATE_EVENT){// && resultCode == RESULT_OK){
+            homeScreenLayout.setAlpha(0.8f);
+            eventCode.setAlpha(1.0f);
+            ViewTarget viewTarget = new ViewTarget(eventCode);
+            ShowcaseView showcaseView = (new ShowcaseView.Builder(this))
+                    .setContentText("Tell your friend to put the code here")
+//                    .setContentTitle("Tell your friend to put the code here")
+                    .setTarget(viewTarget)
+                    .build();
+            showcaseView.setOnShowcaseEventListener(this);
+        }
+    }
+
 }
