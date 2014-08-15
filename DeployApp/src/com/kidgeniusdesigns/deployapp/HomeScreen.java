@@ -37,7 +37,7 @@ public class HomeScreen extends Activity
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
-    
+
     private MobileServiceTable<EventsToImages> mEventsToImagesTable;
 
     @Override
@@ -46,7 +46,7 @@ public class HomeScreen extends Activity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
-        
+
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -54,17 +54,18 @@ public class HomeScreen extends Activity
         {
             mClient = new MobileServiceClient(
                     "https://droiddemo.azure-mobile.net/",
-                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34",
-                    this)
+                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
                     .withFilter(new ProgressFilter());
             mToDoTable = mClient.getTable(Events.class);
-            
-            StorageService mStorageService = new StorageService(getApplicationContext());
-            
-            MobileServiceClient mImagesClient = mStorageService.getMobileServiceClient();
-            
-            mEventsToImagesTable = mImagesClient.
-                    getTable(EventsToImages.class);
+
+            StorageService mStorageService = new StorageService(
+                    getApplicationContext());
+
+            MobileServiceClient mImagesClient = mStorageService
+                    .getMobileServiceClient();
+
+            mEventsToImagesTable = mImagesClient
+                    .getTable(EventsToImages.class);
         }
         catch (MalformedURLException e)
         {
@@ -172,49 +173,53 @@ public class HomeScreen extends Activity
                                                                 }
                                                             }
                                                         });
-                                        
-                                        mEventsToImagesTable.where().field("eventCode").eq(eventCode)
-                                        .execute(new TableQueryCallback<EventsToImages>()
-                                        {
 
-                                            @Override
-                                            public void onCompleted(
-                                                    List<EventsToImages> result,
-                                                    int count,
-                                                    Exception exception,
-                                                    ServiceFilterResponse response)
-                                            {
-                                                if(exception == null)
-                                                {
-                                                    for(EventsToImages temp : result)
-                                                    {
-                                                        mEventsToImagesTable.delete(temp, new TableDeleteCallback()
+                                        mEventsToImagesTable
+                                                .where()
+                                                .field("eventCode")
+                                                .eq(eventCode)
+                                                .execute(
+                                                        new TableQueryCallback<EventsToImages>()
                                                         {
 
                                                             @Override
                                                             public void onCompleted(
+                                                                    List<EventsToImages> result,
+                                                                    int count,
                                                                     Exception exception,
                                                                     ServiceFilterResponse response)
                                                             {
-                                                                
-                                                                
+                                                                if (exception == null)
+                                                                {
+                                                                    for (EventsToImages temp : result)
+                                                                    {
+                                                                        mEventsToImagesTable
+                                                                                .delete(temp,
+                                                                                        new TableDeleteCallback()
+                                                                                        {
+
+                                                                                            @Override
+                                                                                            public void onCompleted(
+                                                                                                    Exception exception,
+                                                                                                    ServiceFilterResponse response)
+                                                                                            {
+
+                                                                                            }
+
+                                                                                        });
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+
+                                                                }
+
                                                             }
-                                                            
+
                                                         });
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    
-                                                }
-                                                
-                                            }
-                                            
-                                        });
                                     }
                                     else
                                     {
-                                        
 
                                         i.putExtra("title",
                                                 cur.getTitle());
@@ -236,31 +241,39 @@ public class HomeScreen extends Activity
                                                 getIntent()
                                                         .getStringExtra(
                                                                 "username"));
-                                        
-                                        mEventsToImagesTable.where().field("eventcode").eq(eventCode)
-                                        .execute(new TableQueryCallback<EventsToImages>()
-                                                {
 
-                                                    @Override
-                                                    public void onCompleted(
-                                                            List<EventsToImages> result,
-                                                            int count,
-                                                            Exception exception,
-                                                            ServiceFilterResponse response)
-                                                    {
-                                                        if(exception == null)
+                                        mEventsToImagesTable
+                                                .where()
+                                                .field("eventcode")
+                                                .eq(eventCode)
+                                                .execute(
+                                                        new TableQueryCallback<EventsToImages>()
                                                         {
-                                                            i.putExtra("imagename", result.get(0).getImageName());
-                                                            startActivity(i);
-                                                        }
-                                                        else
-                                                        {
-                                                            
-                                                        }
-                                                    }
-                                                    
-                                                });
-                                        
+
+                                                            @Override
+                                                            public void onCompleted(
+                                                                    List<EventsToImages> result,
+                                                                    int count,
+                                                                    Exception exception,
+                                                                    ServiceFilterResponse response)
+                                                            {
+                                                                if (exception == null)
+                                                                {
+                                                                    i.putExtra(
+                                                                            "imagename",
+                                                                            result.get(
+                                                                                    0)
+                                                                                    .getImageName());
+                                                                    startActivity(i);
+                                                                }
+                                                                else
+                                                                {
+
+                                                                }
+                                                            }
+
+                                                        });
+
                                     }
                                 }
                             }
@@ -392,7 +405,8 @@ public class HomeScreen extends Activity
                                             cur.getOwnerId());
                                     i.putExtra("descrip",
                                             cur.getDescrip());
-                                    i.putExtra("username",
+                                    i.putExtra(
+                                            "username",
                                             getIntent()
                                                     .getStringExtra(
                                                             "username"));

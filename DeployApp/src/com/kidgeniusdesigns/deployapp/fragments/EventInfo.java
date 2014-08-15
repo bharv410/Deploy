@@ -23,7 +23,7 @@ public class EventInfo extends Fragment
     static TextView partyCountdown, titleView, descrView,
             dateView, creatorView, startTimeView;
     public static ImageButton atButton;
-    
+
     public static ImageView eventPhoto;
 
     @Override
@@ -57,10 +57,10 @@ public class EventInfo extends Fragment
         descrView = (TextView) getActivity().findViewById(
                 R.id.descrip);
         descrView.setText(EventHome.description);
-        
+
         eventPhoto = (ImageView) getActivity().findViewById(
                 R.id.eventPhoto);
-        
+
         super.onActivityCreated(savedInstanceState);
     }
 

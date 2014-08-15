@@ -54,14 +54,14 @@ public class EventHome extends FragmentActivity
     private MobileServiceClient mClient;
     private MobileServiceTable<Attendee> mAttendeeTable;
     public static GeoPoint eventLatLng;
-    
+
     public StorageService mStorageService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        
+
         ActionBar bar = getActionBar();
         BugSenseHandler.initAndStartSession(EventHome.this,
                 "d76061ee");
@@ -80,13 +80,14 @@ public class EventHome extends FragmentActivity
         eventLocation = intent.getStringExtra("location");
         eventLatLng = geocodeAddress(eventLocation);
         description = intent.getStringExtra("descrip");
-        
+
         imageName = intent.getStringExtra("imagename");
-        
-        mStorageService = new StorageService(getApplicationContext());
-        
+
+        mStorageService = new StorageService(
+                getApplicationContext());
+
         mStorageService.getBlobSas("deployimages", imageName);
-        
+
         // Toast.makeText(getApplicationContext(),
         // intent.getStringExtra("latOfEvent"), Toast.LENGTH_LONG).show();
         double millisTil = intent.getDoubleExtra("eventtime",
@@ -137,73 +138,92 @@ public class EventHome extends FragmentActivity
         });
         setAttending(" checkedin");
     }
-    
+
     /***
      * Broadcast receiver handles blobs being loaded or a new blob being created
      */
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, android.content.Intent intent) {
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context,
+                android.content.Intent intent)
+        {
             String intentAction = intent.getAction();
-            if (intentAction.equals("blob.loaded")) {
-                //Load the image using the SAS URL
-                JsonObject blob = mStorageService.getLoadedBlob();
-                sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
+            if (intentAction.equals("blob.loaded"))
+            {
+                // Load the image using the SAS URL
+                JsonObject blob = mStorageService
+                        .getLoadedBlob();
+                sasUrl = blob.getAsJsonPrimitive("sasUrl")
+                        .toString();
                 sasUrl = sasUrl.replace("\"", "");
                 (new ImageFetcherTask(sasUrl)).execute();
             }
-            
+
         }
     };
-    
-  //This class specifically handles fetching an image from a URL and setting
-    //the image view source on the screen
-    private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
+
+    // This class specifically handles fetching an image from a URL and setting
+    // the image view source on the screen
+    private class ImageFetcherTask extends
+            AsyncTask<Void, Void, Boolean>
+    {
         private String mUrl;
         private Bitmap mBitmap;
 
-        public ImageFetcherTask(String url) {
+        public ImageFetcherTask(String url)
+        {
             mUrl = url;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-              mBitmap = BitmapFactory.decodeStream((InputStream)new URL(mUrl).getContent());                    
-            } catch (Exception e) {
+        protected Boolean doInBackground(Void... params)
+        {
+            try
+            {
+                mBitmap = BitmapFactory
+                        .decodeStream((InputStream) new URL(
+                                mUrl).getContent());
+            }
+            catch (Exception e)
+            {
                 Log.e("kidgeniustesting", e.getMessage());
                 return false;
             }
-            return true;            
+            return true;
         }
 
         /***
          * If the image was loaded successfully, set the image view
          */
         @Override
-        protected void onPostExecute(Boolean loaded) {
-            if (loaded) {
+        protected void onPostExecute(Boolean loaded)
+        {
+            if (loaded)
+            {
                 ImageView eventPhoto = (ImageView) findViewById(R.id.eventPhoto);
                 eventPhoto.setImageBitmap(mBitmap);
             }
         }
     }
-    
+
     /***
      * Handle registering for the broadcast action
      */
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         IntentFilter filter = new IntentFilter();
         filter.addAction("blob.loaded");
         registerReceiver(receiver, filter);
         super.onResume();
     }
-    
+
     /***
      * Handle unregistering for broadcast action
      */
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         unregisterReceiver(receiver);
         super.onPause();
     }

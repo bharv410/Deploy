@@ -70,7 +70,7 @@ public class CreateEvent extends FragmentActivity implements
     private MobileServiceTable<Events> mToDoTable;
     private StorageService mStorageService;
     private ProgressBar mProgressBar;
-    
+
     private String imageURI;
     String partyTime;
     ValidationManager mValidationManager;
@@ -110,16 +110,16 @@ public class CreateEvent extends FragmentActivity implements
         descripHints[1] = "Thanks for attending our conference. You've been invited to our post-event dinner. Follow Deploy's instructions to make your way to our secret location.";
         descripHints[2] = "You are one of the few that hold the event code to meet with our surprise music artist who has agreed to sign some autographs.";
         descripHints[3] = "Whats up bud. Could you drop the kids off at wawas. Easily get directions or add to your calendar through this app.";
-        
+
         eventTitle = (EditText) findViewById(R.id.eventTitle);
 
         eventCode = (EditText) findViewById(R.id.eventCode);
-        
+
         eventPhoto = (ImageView) findViewById(R.id.eventPhotoImage);
-        
+
         imageURI = getIntent().getStringExtra("imageURI");
-        
-        if(imageURI != null)
+
+        if (imageURI != null)
         {
             eventPhoto.setImageURI(Uri.parse(imageURI));
         }
@@ -138,18 +138,20 @@ public class CreateEvent extends FragmentActivity implements
         try
         {
             mClient = new MobileServiceClient(
-               "https://droiddemo.azure-mobile.net/",
-               "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this) .withFilter(new
-               ProgressFilter()); 
-            
+                    "https://droiddemo.azure-mobile.net/",
+                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
+                    .withFilter(new ProgressFilter());
+
             mToDoTable = mClient.getTable(Events.class);
-            
-            mStorageService = new StorageApplication(getApplicationContext()).getStorageService();
+
+            mStorageService = new StorageApplication(
+                    getApplicationContext())
+                    .getStorageService();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            //System.out.print("Coudnt get table");
+            // System.out.print("Coudnt get table");
         }
 
         mValidationManager = new ValidationManager(this);
@@ -162,14 +164,13 @@ public class CreateEvent extends FragmentActivity implements
                         "^[a-zA-Z0-9\\-'\\s]{3,}$",
                         "please enter event title."));
     }
-    
+
     public class Item
-    { 
+    {
         public String Id;
         public String Text;
     }
-    
-    
+
     public void onItemClick(AdapterView<?> adapterView,
             View view, int position, long id)
     {
@@ -177,12 +178,13 @@ public class CreateEvent extends FragmentActivity implements
                 .getItemAtPosition(position);
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
-    
 
     public void choosePhoto(View v)
     {
-        Intent intent = new Intent(getApplicationContext(), ChoosePhoto.class);
-        intent.putExtra("username", getIntent().getStringExtra("username"));
+        Intent intent = new Intent(getApplicationContext(),
+                ChoosePhoto.class);
+        intent.putExtra("username",
+                getIntent().getStringExtra("username"));
         startActivity(intent);
     }
 
@@ -205,192 +207,243 @@ public class CreateEvent extends FragmentActivity implements
             uploadImage();
         }
     }
-    
+
     public void uploadImage()
     {
-        if(imageURI != null)
+        if (imageURI != null)
         {
             mStorageService.getSasForNewBlob("deployimages",
-                    getIntent().getStringExtra("username") + imageURI);
+                    getIntent().getStringExtra("username")
+                            + imageURI);
         }
         else
         {
-            MobileServiceClient mImagesClient = mStorageService.getMobileServiceClient();
-            
-            MobileServiceTable<EventsToImages> mEventsToImagesTable = 
-                    mImagesClient.getTable(EventsToImages.class);
-            
+            MobileServiceClient mImagesClient = mStorageService
+                    .getMobileServiceClient();
+
+            MobileServiceTable<EventsToImages> mEventsToImagesTable = mImagesClient
+                    .getTable(EventsToImages.class);
+
             EventsToImages item = new EventsToImages();
-            
+
             String code = eventCode.getText().toString();
-            
+
             item.setEventCode(code);
             item.setImageName("deployicon");
-            
-            mEventsToImagesTable.insert(item, new TableOperationCallback<EventsToImages>() {
-                
-                public void onCompleted(EventsToImages entity, Exception exception,
-                        ServiceFilterResponse response)
-                { 
-                    if (exception == null) 
-                    { 
-                        addItem();
-                    }
-                    else 
-                    { 
-                        
-                    } 
-                } 
-            });
+
+            mEventsToImagesTable
+                    .insert(item,
+                            new TableOperationCallback<EventsToImages>()
+                            {
+
+                                public void onCompleted(
+                                        EventsToImages entity,
+                                        Exception exception,
+                                        ServiceFilterResponse response)
+                                {
+                                    if (exception == null)
+                                    {
+                                        addItem();
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                }
+                            });
         }
     }
 
     public void addItem()
     {
         String eventLocation = locationBox.getText().toString();
-         
+
         Date calTime = tilEvent.getTime();
         String title = eventTitle.getText().toString();
         String code = eventCode.getText().toString();
-        
+
         Events item = new Events();
- 
-        item.setTitle(title); 
+
+        item.setTitle(title);
         item.setEventCode(code);
-        Toast.makeText(getApplicationContext(), code, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), code,
+                Toast.LENGTH_LONG).show();
         item.setComplete(false);
         item.setOwnerId(getIntent().getStringExtra("username"));
         item.setLocation(eventLocation);
         item.setTime(calTime.getTime());
-        
+
         if (!descripBox.getText().toString().equals(""))
             item.setDescrip(descripBox.getText().toString());
-        
-        if(mToDoTable != null)
+
+        if (mToDoTable != null)
         {
 
-            mToDoTable.insert(item, new TableOperationCallback<Events>() {
-    
-                public void onCompleted(Events entity, Exception exception,
-                        ServiceFilterResponse response)
-                { 
-                    if (exception == null) 
-                    { 
-                        Intent i = new Intent( getApplicationContext(), HomeScreen.class);
-                        i.putExtra("eventcode", entity.getEventCode());
-                        startActivity(i);
-                    }
-                    else 
-                    { 
-                        Toast.makeText( getApplicationContext(), "error saving",Toast.LENGTH_LONG).show();
-                    } 
-                } 
-            });
+            mToDoTable.insert(item,
+                    new TableOperationCallback<Events>()
+                    {
+
+                        public void onCompleted(Events entity,
+                                Exception exception,
+                                ServiceFilterResponse response)
+                        {
+                            if (exception == null)
+                            {
+                                Intent i = new Intent(
+                                        getApplicationContext(),
+                                        HomeScreen.class);
+                                i.putExtra("eventcode",
+                                        entity.getEventCode());
+                                startActivity(i);
+                            }
+                            else
+                            {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "error saving",
+                                        Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                    });
         }
 
         // alarm to notify of creator options
-        AlertDialog.Builder builder = new AlertDialog.Builder( CreateEvent.this);
-        
+        AlertDialog.Builder builder = new AlertDialog.Builder(
+                CreateEvent.this);
+
         // 2. Chain together various setter methods to set the dialog
         // characteristics
-        builder.setMessage("To edit details \n View Attendees \n Invite Friends") 
-            .setTitle("Click the green gear on the home screen");
+        builder.setMessage(
+                "To edit details \n View Attendees \n Invite Friends")
+                .setTitle(
+                        "Click the green gear on the home screen");
 
-        // 3. Get the AlertDialog from create() 
+        // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    
+
     /***
      * Broadcast receiver handles blobs being loaded or a new blob being created
      */
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context context, android.content.Intent intent) {
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context,
+                android.content.Intent intent)
+        {
             String intentAction = intent.getAction();
-            if (intentAction.equals("blob.created")) {
-                //If a blob has been created, upload the image
-                JsonObject blob = mStorageService.getLoadedBlob();
-                String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();               
-                (new ImageUploaderTask(sasUrl)).execute(Uri.parse(imageURI));
+            if (intentAction.equals("blob.created"))
+            {
+                // If a blob has been created, upload the image
+                JsonObject blob = mStorageService
+                        .getLoadedBlob();
+                String sasUrl = blob.getAsJsonPrimitive(
+                        "sasUrl").toString();
+                (new ImageUploaderTask(sasUrl)).execute(Uri
+                        .parse(imageURI));
             }
         }
     };
-    
+
     /***
      * Handles uploading an image to a specified url
      */
-    class ImageUploaderTask extends AsyncTask<Uri, Void, Boolean> {
+    class ImageUploaderTask extends
+            AsyncTask<Uri, Void, Boolean>
+    {
         private String mUrl;
-        public ImageUploaderTask(String url) {
+
+        public ImageUploaderTask(String url)
+        {
             mUrl = url;
         }
 
         @Override
-        protected Boolean doInBackground(Uri... params) {
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(params[0]);
+        protected Boolean doInBackground(Uri... params)
+        {
+            try
+            {
+                InputStream inputStream = getContentResolver()
+                        .openInputStream(params[0]);
                 int bytesRead = 0;
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 byte[] b = new byte[1024];
-                while((bytesRead = inputStream.read(b)) != -1)
+                while ((bytesRead = inputStream.read(b)) != -1)
                 {
                     bos.write(b, 0, bytesRead);
                 }
                 byte[] bytes = bos.toByteArray();
                 // Post our image data (byte array) to the server
                 URL url = new URL(mUrl.replace("\"", ""));
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection) url
+                        .openConnection();
                 urlConnection.setDoOutput(true);
                 urlConnection.setRequestMethod("PUT");
-                urlConnection.setRequestProperty("Content-Length", ""+ bytes.length);
+                urlConnection.setRequestProperty(
+                        "Content-Length", "" + bytes.length);
                 // Write image data to server
-                DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                DataOutputStream wr = new DataOutputStream(
+                        urlConnection.getOutputStream());
                 wr.write(bytes);
                 wr.flush();
                 wr.close();
                 int response = urlConnection.getResponseCode();
-                //If we successfully uploaded, return true
+                // If we successfully uploaded, return true
                 if (response == 201
-                        && urlConnection.getResponseMessage().equals("Created")) {
+                        && urlConnection.getResponseMessage()
+                                .equals("Created"))
+                {
                     return true;
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Log.e("kidgeniustesting", ex.getMessage());
             }
-            return false;           
+            return false;
         }
 
         @Override
-        protected void onPostExecute(Boolean uploaded) {
-            if (uploaded) {
-                MobileServiceClient mImagesClient = mStorageService.getMobileServiceClient();
-                
-                MobileServiceTable<EventsToImages> mEventsToImagesTable = 
-                        mImagesClient.getTable(EventsToImages.class);
-                
+        protected void onPostExecute(Boolean uploaded)
+        {
+            if (uploaded)
+            {
+                MobileServiceClient mImagesClient = mStorageService
+                        .getMobileServiceClient();
+
+                MobileServiceTable<EventsToImages> mEventsToImagesTable = mImagesClient
+                        .getTable(EventsToImages.class);
+
                 EventsToImages item = new EventsToImages();
-                
+
                 String code = eventCode.getText().toString();
-                String username = getIntent().getStringExtra("username");
-                
+                String username = getIntent().getStringExtra(
+                        "username");
+
                 item.setEventCode(code);
                 item.setImageName(username + imageURI);
-                
-                mEventsToImagesTable.insert(item, new TableOperationCallback<EventsToImages>() {
-                    
-                    public void onCompleted(EventsToImages entity, Exception exception,
-                            ServiceFilterResponse response)
-                    { 
-                        if (exception == null) 
-                        { 
-                            addItem();
-                        }
-                        else 
-                        { 
-                            
-                        } 
-                    } 
-                });
+
+                mEventsToImagesTable
+                        .insert(item,
+                                new TableOperationCallback<EventsToImages>()
+                                {
+
+                                    public void onCompleted(
+                                            EventsToImages entity,
+                                            Exception exception,
+                                            ServiceFilterResponse response)
+                                    {
+                                        if (exception == null)
+                                        {
+                                            addItem();
+                                        }
+                                        else
+                                        {
+
+                                        }
+                                    }
+                                });
             }
         }
     }
@@ -411,12 +464,12 @@ public class CreateEvent extends FragmentActivity implements
         eventCode.setHint(codeHints[rand]);
         locationBox.setHint(locHints[rand]);
         descripBox.setHint(descripHints[rand]);
-        
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("blob.created");
         registerReceiver(receiver, filter);
     }
-    
+
     @Override
     public void onPause()
     {
