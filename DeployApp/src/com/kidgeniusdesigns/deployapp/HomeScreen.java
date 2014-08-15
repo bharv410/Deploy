@@ -189,6 +189,17 @@ public class HomeScreen extends Activity
                                                                                             {
                                                                                             }
                                                                                         });
+                                                                        
+                                                                        String imageName = temp.getImageName();
+                                                                        
+                                                                        if(imageName != null && !imageName.equals("deployicon"))
+                                                                        {
+                                                                        
+                                                                            StorageService mStorageService = new StorageService(
+                                                                                    getApplicationContext());
+                                                                            
+                                                                            mStorageService.deleteBlob("deployimages", temp.getImageName());
+                                                                        }
                                                                     }
                                                                 }
                                                                 else

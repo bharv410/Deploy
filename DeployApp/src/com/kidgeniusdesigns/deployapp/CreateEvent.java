@@ -72,6 +72,7 @@ public class CreateEvent extends FragmentActivity implements
     private ProgressBar mProgressBar;
 
     private String imageURI;
+    private String imageName;
     String partyTime;
     ValidationManager mValidationManager;
     String[] titleHints, codeHints, locHints, descripHints;
@@ -212,9 +213,13 @@ public class CreateEvent extends FragmentActivity implements
     {
         if (imageURI != null)
         {
+            Calendar cal = Calendar.getInstance();
+            
+            imageName = getIntent().getStringExtra("username") + imageURI +
+                    cal.getTimeInMillis();
+            
             mStorageService.getSasForNewBlob("deployimages",
-                    getIntent().getStringExtra("username")
-                            + imageURI);
+                    imageName);
         }
         else
         {
@@ -418,11 +423,9 @@ public class CreateEvent extends FragmentActivity implements
                 EventsToImages item = new EventsToImages();
 
                 String code = eventCode.getText().toString();
-                String username = getIntent().getStringExtra(
-                        "username");
 
                 item.setEventCode(code);
-                item.setImageName(username + imageURI);
+                item.setImageName(imageName);
 
                 mEventsToImagesTable
                         .insert(item,
