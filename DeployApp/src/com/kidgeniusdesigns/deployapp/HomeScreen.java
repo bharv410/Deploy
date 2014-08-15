@@ -3,7 +3,6 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -17,7 +16,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -37,7 +35,6 @@ public class HomeScreen extends Activity
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
-
     private MobileServiceTable<EventsToImages> mEventsToImagesTable;
 
     @Override
@@ -46,7 +43,6 @@ public class HomeScreen extends Activity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
-
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -57,13 +53,10 @@ public class HomeScreen extends Activity
                     "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
                     .withFilter(new ProgressFilter());
             mToDoTable = mClient.getTable(Events.class);
-
             StorageService mStorageService = new StorageService(
                     getApplicationContext());
-
             MobileServiceClient mImagesClient = mStorageService
                     .getMobileServiceClient();
-
             mEventsToImagesTable = mImagesClient
                     .getTable(EventsToImages.class);
         }
@@ -71,14 +64,12 @@ public class HomeScreen extends Activity
         {
             e.printStackTrace();
         }
-
     }
 
     public void goToEvent(View v)
     {
         enteredCode = eventCode.getText().toString();
         eventCode.setText("");
-
         if (enteredCode != null && !enteredCode.equals(""))
         {
             // drops keyboard
@@ -88,7 +79,6 @@ public class HomeScreen extends Activity
                     eventCode.getApplicationWindowToken(),
                     InputMethodManager.HIDE_NOT_ALWAYS);
             findItem(enteredCode);
-
         }
         else
         {
@@ -98,16 +88,13 @@ public class HomeScreen extends Activity
             toast.setGravity(Gravity.CENTER, 0, -150);
             toast.show();
         }
-
     }
 
     public void findItem(final String eventCode)
     {
-
         mToDoTable.where().field("eventcode").eq(eventCode)
                 .execute(new TableQueryCallback<Events>()
                 {
-
                     public void onCompleted(
                             List<Events> result, int count,
                             Exception exception,
@@ -173,7 +160,6 @@ public class HomeScreen extends Activity
                                                                 }
                                                             }
                                                         });
-
                                         mEventsToImagesTable
                                                 .where()
                                                 .field("eventCode")
@@ -181,7 +167,6 @@ public class HomeScreen extends Activity
                                                 .execute(
                                                         new TableQueryCallback<EventsToImages>()
                                                         {
-
                                                             @Override
                                                             public void onCompleted(
                                                                     List<EventsToImages> result,
@@ -197,30 +182,23 @@ public class HomeScreen extends Activity
                                                                                 .delete(temp,
                                                                                         new TableDeleteCallback()
                                                                                         {
-
                                                                                             @Override
                                                                                             public void onCompleted(
                                                                                                     Exception exception,
                                                                                                     ServiceFilterResponse response)
                                                                                             {
-
                                                                                             }
-
                                                                                         });
                                                                     }
                                                                 }
                                                                 else
                                                                 {
-
                                                                 }
-
                                                             }
-
                                                         });
                                     }
                                     else
                                     {
-
                                         i.putExtra("title",
                                                 cur.getTitle());
                                         i.putExtra(
@@ -241,7 +219,6 @@ public class HomeScreen extends Activity
                                                 getIntent()
                                                         .getStringExtra(
                                                                 "username"));
-
                                         mEventsToImagesTable
                                                 .where()
                                                 .field("eventcode")
@@ -249,7 +226,6 @@ public class HomeScreen extends Activity
                                                 .execute(
                                                         new TableQueryCallback<EventsToImages>()
                                                         {
-
                                                             @Override
                                                             public void onCompleted(
                                                                     List<EventsToImages> result,
@@ -268,12 +244,9 @@ public class HomeScreen extends Activity
                                                                 }
                                                                 else
                                                                 {
-
                                                                 }
                                                             }
-
                                                         });
-
                                     }
                                 }
                             }
@@ -294,7 +267,6 @@ public class HomeScreen extends Activity
         i.putExtra("username",
                 getIntent().getStringExtra("username"));
         startActivity(i);
-
     }
 
     private class ProgressFilter implements ServiceFilter
@@ -307,7 +279,6 @@ public class HomeScreen extends Activity
         {
             runOnUiThread(new Runnable()
             {
-
                 @Override
                 public void run()
                 {
@@ -319,7 +290,6 @@ public class HomeScreen extends Activity
             nextServiceFilterCallback.onNext(request,
                     new ServiceFilterResponseCallback()
                     {
-
                         @Override
                         public void onResponse(
                                 ServiceFilterResponse response,
@@ -327,7 +297,6 @@ public class HomeScreen extends Activity
                         {
                             runOnUiThread(new Runnable()
                             {
-
                                 @Override
                                 public void run()
                                 {
@@ -336,7 +305,6 @@ public class HomeScreen extends Activity
                                                 .setVisibility(ProgressBar.GONE);
                                 }
                             });
-
                             if (responseCallback != null)
                                 responseCallback.onResponse(
                                         response, exception);
@@ -362,11 +330,9 @@ public class HomeScreen extends Activity
 
     public void editItem(String eventCode)
     {
-
         mToDoTable.where().field("eventcode").eq(eventCode)
                 .execute(new TableQueryCallback<Events>()
                 {
-
                     public void onCompleted(
                             List<Events> result, int count,
                             Exception exception,
@@ -425,20 +391,16 @@ public class HomeScreen extends Activity
 
     public void displayPopUp()
     {
-
         // 1. Instantiate an AlertDialog.Builder with its constructor
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 HomeScreen.this);
-
         // 2. Chain together various setter methods to set the dialog
         // characteristics
         builder.setMessage(
-                "Enter event code of event that you created  so you can edit, send invites, etc")
+                "Enter event code of event that you created so you can edit, send invites, etc")
                 .setTitle("Event Creator button");
-
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
-
     }
 }
