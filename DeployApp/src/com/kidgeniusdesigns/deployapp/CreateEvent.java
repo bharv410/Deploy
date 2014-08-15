@@ -1,6 +1,7 @@
 package com.kidgeniusdesigns.deployapp;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,21 +14,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -41,12 +38,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.androidquery.AQuery;
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
+import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.kidgeniusdesigns.deployapp.fragments.TimePickerFragment;
@@ -64,18 +62,16 @@ public class CreateEvent extends FragmentActivity implements
         OnItemClickListener
 {
     EditText eventTitle, eventCode, descripBox;
+    ImageView eventPhoto;
     AutoCompleteTextView locationBox;
-
-    // Android Query API for image downloading
-    private AQuery aq;
-    // use AsyncTask, possibly long loading time
-    private AsyncTask<Void,Void,String[]> imageNamePullAsyncTask;
-    private String[] imageNameArray;
 
     public static Calendar tilEvent;
     private MobileServiceClient mClient;
     private MobileServiceTable<Events> mToDoTable;
+    private StorageService mStorageService;
     private ProgressBar mProgressBar;
+
+    private String imageURI;
     String partyTime;
     ValidationManager mValidationManager;
     String[] titleHints, codeHints, locHints, descripHints;
@@ -85,7 +81,6 @@ public class CreateEvent extends FragmentActivity implements
     private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
     private static final String OUT_JSON = "/json";
     private static final String API_KEY = "AIzaSyCgP3QVf6vpoGqZJxlMY84RnYRo_BZ8JbI";
-    private static final String IMAGE_ADDRESS = "http://kidgeniustesting.cloudapp.net/deploy/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -119,12 +114,15 @@ public class CreateEvent extends FragmentActivity implements
         eventTitle = (EditText) findViewById(R.id.eventTitle);
 
         eventCode = (EditText) findViewById(R.id.eventCode);
-        
-        // Android Query API for image downloading
-        aq = new AQuery(this);
 
-        // use AsyncTask, possibly long loading time
-        imageNamePullAsyncTask = new ImageNamePullAsyncTask().execute();
+        eventPhoto = (ImageView) findViewById(R.id.eventPhotoImage);
+
+        imageURI = getIntent().getStringExtra("imageURI");
+
+        if (imageURI != null)
+        {
+            eventPhoto.setImageURI(Uri.parse(imageURI));
+        }
 
         locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
 
@@ -143,11 +141,17 @@ public class CreateEvent extends FragmentActivity implements
                     "https://droiddemo.azure-mobile.net/",
                     "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
                     .withFilter(new ProgressFilter());
+
             mToDoTable = mClient.getTable(Events.class);
+
+            mStorageService = new StorageApplication(
+                    getApplicationContext())
+                    .getStorageService();
         }
         catch (Exception e)
         {
-            System.out.print("Coudnt get table");
+            e.printStackTrace();
+            // System.out.print("Coudnt get table");
         }
 
         mValidationManager = new ValidationManager(this);
@@ -161,6 +165,12 @@ public class CreateEvent extends FragmentActivity implements
                         "please enter event title."));
     }
 
+    public class Item
+    {
+        public String Id;
+        public String Text;
+    }
+
     public void onItemClick(AdapterView<?> adapterView,
             View view, int position, long id)
     {
@@ -171,24 +181,11 @@ public class CreateEvent extends FragmentActivity implements
 
     public void choosePhoto(View v)
     {
-        try
-        {
-            imageNameArray = imageNamePullAsyncTask.get();
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        
-        if(imageNameArray != null)
-        {
-            for(int i = 0; i < imageNameArray.length; i++)
-            {
-                Log.i("kidgeniustesting", imageNameArray[i]);
-            }
-        }
-        
-        // pass imageNameArray and show pics
+        Intent intent = new Intent(getApplicationContext(),
+                ChoosePhoto.class);
+        intent.putExtra("username",
+                getIntent().getStringExtra("username"));
+        startActivity(intent);
     }
 
     public void showDatePickerDialog(View v)
@@ -207,7 +204,53 @@ public class CreateEvent extends FragmentActivity implements
     {
         if (mValidationManager.validateAllAndSetError())
         {
-            addItem();
+            uploadImage();
+        }
+    }
+
+    public void uploadImage()
+    {
+        if (imageURI != null)
+        {
+            mStorageService.getSasForNewBlob("deployimages",
+                    getIntent().getStringExtra("username")
+                            + imageURI);
+        }
+        else
+        {
+            MobileServiceClient mImagesClient = mStorageService
+                    .getMobileServiceClient();
+
+            MobileServiceTable<EventsToImages> mEventsToImagesTable = mImagesClient
+                    .getTable(EventsToImages.class);
+
+            EventsToImages item = new EventsToImages();
+
+            String code = eventCode.getText().toString();
+
+            item.setEventCode(code);
+            item.setImageName("deployicon");
+
+            mEventsToImagesTable
+                    .insert(item,
+                            new TableOperationCallback<EventsToImages>()
+                            {
+
+                                public void onCompleted(
+                                        EventsToImages entity,
+                                        Exception exception,
+                                        ServiceFilterResponse response)
+                                {
+                                    if (exception == null)
+                                    {
+                                        addItem();
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                }
+                            });
         }
     }
 
@@ -229,39 +272,46 @@ public class CreateEvent extends FragmentActivity implements
         item.setOwnerId(getIntent().getStringExtra("username"));
         item.setLocation(eventLocation);
         item.setTime(calTime.getTime());
+
         if (!descripBox.getText().toString().equals(""))
             item.setDescrip(descripBox.getText().toString());
 
-        mToDoTable.insert(item,
-                new TableOperationCallback<Events>()
-                {
+        if (mToDoTable != null)
+        {
 
-                    public void onCompleted(Events entity,
-                            Exception exception,
-                            ServiceFilterResponse response)
+            mToDoTable.insert(item,
+                    new TableOperationCallback<Events>()
                     {
-                        if (exception == null)
+
+                        public void onCompleted(Events entity,
+                                Exception exception,
+                                ServiceFilterResponse response)
                         {
-                            Intent i = new Intent(
-                                    getApplicationContext(),
-                                    HomeScreen.class);
-                            i.putExtra("eventcode",
-                                    entity.getEventCode());
-                            startActivity(i);
+                            if (exception == null)
+                            {
+                                Intent i = new Intent(
+                                        getApplicationContext(),
+                                        HomeScreen.class);
+                                i.putExtra("eventcode",
+                                        entity.getEventCode());
+                                startActivity(i);
+                            }
+                            else
+                            {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "error saving",
+                                        Toast.LENGTH_LONG)
+                                        .show();
+                            }
                         }
-                        else
-                        {
-                            Toast.makeText(
-                                    getApplicationContext(),
-                                    "error saving",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
+                    });
+        }
 
         // alarm to notify of creator options
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 CreateEvent.this);
+
         // 2. Chain together various setter methods to set the dialog
         // characteristics
         builder.setMessage(
@@ -272,6 +322,130 @@ public class CreateEvent extends FragmentActivity implements
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    /***
+     * Broadcast receiver handles blobs being loaded or a new blob being created
+     */
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context,
+                android.content.Intent intent)
+        {
+            String intentAction = intent.getAction();
+            if (intentAction.equals("blob.created"))
+            {
+                // If a blob has been created, upload the image
+                JsonObject blob = mStorageService
+                        .getLoadedBlob();
+                String sasUrl = blob.getAsJsonPrimitive(
+                        "sasUrl").toString();
+                (new ImageUploaderTask(sasUrl)).execute(Uri
+                        .parse(imageURI));
+            }
+        }
+    };
+
+    /***
+     * Handles uploading an image to a specified url
+     */
+    class ImageUploaderTask extends
+            AsyncTask<Uri, Void, Boolean>
+    {
+        private String mUrl;
+
+        public ImageUploaderTask(String url)
+        {
+            mUrl = url;
+        }
+
+        @Override
+        protected Boolean doInBackground(Uri... params)
+        {
+            try
+            {
+                InputStream inputStream = getContentResolver()
+                        .openInputStream(params[0]);
+                int bytesRead = 0;
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] b = new byte[1024];
+                while ((bytesRead = inputStream.read(b)) != -1)
+                {
+                    bos.write(b, 0, bytesRead);
+                }
+                byte[] bytes = bos.toByteArray();
+                // Post our image data (byte array) to the server
+                URL url = new URL(mUrl.replace("\"", ""));
+                HttpURLConnection urlConnection = (HttpURLConnection) url
+                        .openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setRequestProperty(
+                        "Content-Length", "" + bytes.length);
+                // Write image data to server
+                DataOutputStream wr = new DataOutputStream(
+                        urlConnection.getOutputStream());
+                wr.write(bytes);
+                wr.flush();
+                wr.close();
+                int response = urlConnection.getResponseCode();
+                // If we successfully uploaded, return true
+                if (response == 201
+                        && urlConnection.getResponseMessage()
+                                .equals("Created"))
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.e("kidgeniustesting", ex.getMessage());
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean uploaded)
+        {
+            if (uploaded)
+            {
+                MobileServiceClient mImagesClient = mStorageService
+                        .getMobileServiceClient();
+
+                MobileServiceTable<EventsToImages> mEventsToImagesTable = mImagesClient
+                        .getTable(EventsToImages.class);
+
+                EventsToImages item = new EventsToImages();
+
+                String code = eventCode.getText().toString();
+                String username = getIntent().getStringExtra(
+                        "username");
+
+                item.setEventCode(code);
+                item.setImageName(username + imageURI);
+
+                mEventsToImagesTable
+                        .insert(item,
+                                new TableOperationCallback<EventsToImages>()
+                                {
+
+                                    public void onCompleted(
+                                            EventsToImages entity,
+                                            Exception exception,
+                                            ServiceFilterResponse response)
+                                    {
+                                        if (exception == null)
+                                        {
+                                            addItem();
+                                        }
+                                        else
+                                        {
+
+                                        }
+                                    }
+                                });
+            }
+        }
     }
 
     @Override
@@ -290,6 +464,17 @@ public class CreateEvent extends FragmentActivity implements
         eventCode.setHint(codeHints[rand]);
         locationBox.setHint(locHints[rand]);
         descripBox.setHint(descripHints[rand]);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("blob.created");
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     private class ProgressFilter implements ServiceFilter
@@ -476,98 +661,6 @@ public class CreateEvent extends FragmentActivity implements
                 }
             };
             return filter;
-        }
-    }
-
-    /**
-     * Used to download image names from server in background thread
-     * 
-     *
-     */
-    public class ImageNamePullAsyncTask extends
-            AsyncTask<Void, Void, String[]>
-    {   
-        @Override
-        protected String[] doInBackground(Void... params)
-        {
-            String[] imageNames = null;
-
-            try
-            {
-                JSONArray jsonArray = new JSONArray(
-                        getImageNames());
-
-                imageNames = new String[jsonArray.length()];
-
-                for (int i = 0; i < imageNames.length; i++)
-                {
-                    imageNames[i] = jsonArray
-                            .getString(i);
-                    
-                    imageNames[i] = imageNames[i].replace("\\", "");
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            return imageNames;
-        }
-        
-        @Override
-        protected void onPostExecute(String[] result)
-        {
-            if(result != null)
-            {
-                Random rg = new Random();
-                int rand = rg.nextInt(result.length);
-                
-                aq.id(R.id.eventPhotoImage).image(
-                        IMAGE_ADDRESS + result[rand]);
-            }
-        }
-
-        private String getImageNames()
-        {
-            StringBuilder builder = new StringBuilder();
-            HttpClient client = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(
-                    IMAGE_ADDRESS + "images.php");
-            try
-            {
-                HttpResponse response = client.execute(httpGet);
-                StatusLine statusLine = response
-                        .getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == 200)
-                {
-                    HttpEntity entity = response.getEntity();
-                    InputStream content = entity.getContent();
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(content));
-                    String line;
-                    while ((line = reader.readLine()) != null)
-                    {
-                        builder.append(line);
-                    }
-                }
-                else
-                {
-                    Log.e("kidgeniustesting",
-                            "Failed to download file");
-                }
-            }
-            catch (ClientProtocolException e)
-            {
-                e.printStackTrace();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-            return builder.toString();
         }
     }
 }

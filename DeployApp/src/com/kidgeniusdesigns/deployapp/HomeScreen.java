@@ -3,27 +3,19 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -36,15 +28,14 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
-public class HomeScreen extends Activity implements OnShowcaseEventListener
+public class HomeScreen extends Activity
 {
-    public static final int REQUEST_CODE_CREATE_EVENT = 0;
     private EditText eventCode;
     private MobileServiceClient mClient;
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
-    private ViewGroup homeScreenLayout;
+    private MobileServiceTable<EventsToImages> mEventsToImagesTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,8 +43,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
-
-        homeScreenLayout = (ViewGroup) findViewById(R.id.homeScreenLayout);
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -61,27 +50,26 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
         {
             mClient = new MobileServiceClient(
                     "https://droiddemo.azure-mobile.net/",
-                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34",
-                    getApplicationContext())
-            // use getApplicationContext() instead of
-            // this reference. Garbage collection
-            // will not be called when this reference
-            // is used
+                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
                     .withFilter(new ProgressFilter());
             mToDoTable = mClient.getTable(Events.class);
+            StorageService mStorageService = new StorageService(
+                    getApplicationContext());
+            MobileServiceClient mImagesClient = mStorageService
+                    .getMobileServiceClient();
+            mEventsToImagesTable = mImagesClient
+                    .getTable(EventsToImages.class);
         }
         catch (MalformedURLException e)
         {
             e.printStackTrace();
         }
-
     }
 
     public void goToEvent(View v)
     {
         enteredCode = eventCode.getText().toString();
         eventCode.setText("");
-
         if (enteredCode != null && !enteredCode.equals(""))
         {
             // drops keyboard
@@ -91,7 +79,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                     eventCode.getApplicationWindowToken(),
                     InputMethodManager.HIDE_NOT_ALWAYS);
             findItem(enteredCode);
-
         }
         else
         {
@@ -101,16 +88,13 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
             toast.setGravity(Gravity.CENTER, 0, -150);
             toast.show();
         }
-
     }
 
-    public void findItem(String eventCode)
+    public void findItem(final String eventCode)
     {
-
         mToDoTable.where().field("eventcode").eq(eventCode)
                 .execute(new TableQueryCallback<Events>()
                 {
-
                     public void onCompleted(
                             List<Events> result, int count,
                             Exception exception,
@@ -133,7 +117,7 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                             }
                             else
                             {
-                                Intent i = new Intent(
+                                final Intent i = new Intent(
                                         getApplicationContext(),
                                         EventHome.class);
                                 Events cur;
@@ -176,10 +160,45 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                                                                 }
                                                             }
                                                         });
+                                        mEventsToImagesTable
+                                                .where()
+                                                .field("eventCode")
+                                                .eq(eventCode)
+                                                .execute(
+                                                        new TableQueryCallback<EventsToImages>()
+                                                        {
+                                                            @Override
+                                                            public void onCompleted(
+                                                                    List<EventsToImages> result,
+                                                                    int count,
+                                                                    Exception exception,
+                                                                    ServiceFilterResponse response)
+                                                            {
+                                                                if (exception == null)
+                                                                {
+                                                                    for (EventsToImages temp : result)
+                                                                    {
+                                                                        mEventsToImagesTable
+                                                                                .delete(temp,
+                                                                                        new TableDeleteCallback()
+                                                                                        {
+                                                                                            @Override
+                                                                                            public void onCompleted(
+                                                                                                    Exception exception,
+                                                                                                    ServiceFilterResponse response)
+                                                                                            {
+                                                                                            }
+                                                                                        });
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                }
+                                                            }
+                                                        });
                                     }
                                     else
                                     {
-
                                         i.putExtra("title",
                                                 cur.getTitle());
                                         i.putExtra(
@@ -200,7 +219,34 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                                                 getIntent()
                                                         .getStringExtra(
                                                                 "username"));
-                                        startActivity(i);
+                                        mEventsToImagesTable
+                                                .where()
+                                                .field("eventcode")
+                                                .eq(eventCode)
+                                                .execute(
+                                                        new TableQueryCallback<EventsToImages>()
+                                                        {
+                                                            @Override
+                                                            public void onCompleted(
+                                                                    List<EventsToImages> result,
+                                                                    int count,
+                                                                    Exception exception,
+                                                                    ServiceFilterResponse response)
+                                                            {
+                                                                if (exception == null)
+                                                                {
+                                                                    i.putExtra(
+                                                                            "imagename",
+                                                                            result.get(
+                                                                                    0)
+                                                                                    .getImageName());
+                                                                    startActivity(i);
+                                                                }
+                                                                else
+                                                                {
+                                                                }
+                                                            }
+                                                        });
                                     }
                                 }
                             }
@@ -220,22 +266,7 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                 CreateEvent.class);
         i.putExtra("username",
                 getIntent().getStringExtra("username"));
-        startActivityForResult(i, REQUEST_CODE_CREATE_EVENT);
-        //startActivity(i);
-
-    }
-
-    @Override
-    public void onShowcaseViewHide(ShowcaseView showcaseView) {
-    }
-
-    @Override
-    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-        homeScreenLayout.setAlpha(1.0f);
-    }
-
-    @Override
-    public void onShowcaseViewShow(ShowcaseView showcaseView) {
+        startActivity(i);
     }
 
     private class ProgressFilter implements ServiceFilter
@@ -248,7 +279,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
         {
             runOnUiThread(new Runnable()
             {
-
                 @Override
                 public void run()
                 {
@@ -260,7 +290,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
             nextServiceFilterCallback.onNext(request,
                     new ServiceFilterResponseCallback()
                     {
-
                         @Override
                         public void onResponse(
                                 ServiceFilterResponse response,
@@ -268,7 +297,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                         {
                             runOnUiThread(new Runnable()
                             {
-
                                 @Override
                                 public void run()
                                 {
@@ -277,7 +305,6 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                                                 .setVisibility(ProgressBar.GONE);
                                 }
                             });
-
                             if (responseCallback != null)
                                 responseCallback.onResponse(
                                         response, exception);
@@ -303,11 +330,9 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
 
     public void editItem(String eventCode)
     {
-
         mToDoTable.where().field("eventcode").eq(eventCode)
                 .execute(new TableQueryCallback<Events>()
                 {
-
                     public void onCompleted(
                             List<Events> result, int count,
                             Exception exception,
@@ -346,7 +371,8 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
                                             cur.getOwnerId());
                                     i.putExtra("descrip",
                                             cur.getDescrip());
-                                    i.putExtra("username",
+                                    i.putExtra(
+                                            "username",
                                             getIntent()
                                                     .getStringExtra(
                                                             "username"));
@@ -365,38 +391,16 @@ public class HomeScreen extends Activity implements OnShowcaseEventListener
 
     public void displayPopUp()
     {
-
         // 1. Instantiate an AlertDialog.Builder with its constructor
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 HomeScreen.this);
-
         // 2. Chain together various setter methods to set the dialog
         // characteristics
         builder.setMessage(
-                "Enter event code of event that you created  so you can edit, send invites, etc")
+                "Enter event code of event that you created so you can edit, send invites, etc")
                 .setTitle("Event Creator button");
-
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
-
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE_CREATE_EVENT){// && resultCode == RESULT_OK){
-            homeScreenLayout.setAlpha(0.8f);
-            eventCode.setAlpha(1.0f);
-            ViewTarget viewTarget = new ViewTarget(eventCode);
-            ShowcaseView showcaseView = (new ShowcaseView.Builder(this))
-                    .setContentText("Tell your friend to put the code here")
-//                    .setContentTitle("Tell your friend to put the code here")
-                    .setTarget(viewTarget)
-                    .build();
-            showcaseView.setOnShowcaseEventListener(this);
-        }
-    }
-
 }

@@ -1,6 +1,8 @@
 package com.kidgeniusdesigns.deployapp;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -9,19 +11,28 @@ import java.util.concurrent.TimeUnit;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bugsense.trace.BugSenseHandler;
 import com.google.android.maps.GeoPoint;
+import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.deployapp.fragments.Attendee;
 import com.kidgeniusdesigns.deployapp.fragments.EventInfo;
 import com.kidgeniusdesigns.deployapp.fragments.TabsPagerAdapter;
@@ -37,16 +48,20 @@ public class EventHome extends FragmentActivity
     TabsPagerAdapter pageAdapter;
     public static FragmentManager fragmentManager;
     public static String countdown, title, creator,
-            eventLocation, eventCode, description;
+            eventLocation, eventCode, description, imageName,
+            sasUrl;
     public static long cd;
     private MobileServiceClient mClient;
     private MobileServiceTable<Attendee> mAttendeeTable;
     public static GeoPoint eventLatLng;
 
+    public StorageService mStorageService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         ActionBar bar = getActionBar();
         BugSenseHandler.initAndStartSession(EventHome.this,
                 "d76061ee");
@@ -65,6 +80,14 @@ public class EventHome extends FragmentActivity
         eventLocation = intent.getStringExtra("location");
         eventLatLng = geocodeAddress(eventLocation);
         description = intent.getStringExtra("descrip");
+
+        imageName = intent.getStringExtra("imagename");
+
+        mStorageService = new StorageService(
+                getApplicationContext());
+
+        mStorageService.getBlobSas("deployimages", imageName);
+
         // Toast.makeText(getApplicationContext(),
         // intent.getStringExtra("latOfEvent"), Toast.LENGTH_LONG).show();
         double millisTil = intent.getDoubleExtra("eventtime",
@@ -114,6 +137,95 @@ public class EventHome extends FragmentActivity
             }
         });
         setAttending(" checkedin");
+    }
+
+    /***
+     * Broadcast receiver handles blobs being loaded or a new blob being created
+     */
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context,
+                android.content.Intent intent)
+        {
+            String intentAction = intent.getAction();
+            if (intentAction.equals("blob.loaded"))
+            {
+                // Load the image using the SAS URL
+                JsonObject blob = mStorageService
+                        .getLoadedBlob();
+                sasUrl = blob.getAsJsonPrimitive("sasUrl")
+                        .toString();
+                sasUrl = sasUrl.replace("\"", "");
+                (new ImageFetcherTask(sasUrl)).execute();
+            }
+
+        }
+    };
+
+    // This class specifically handles fetching an image from a URL and setting
+    // the image view source on the screen
+    private class ImageFetcherTask extends
+            AsyncTask<Void, Void, Boolean>
+    {
+        private String mUrl;
+        private Bitmap mBitmap;
+
+        public ImageFetcherTask(String url)
+        {
+            mUrl = url;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            try
+            {
+                mBitmap = BitmapFactory
+                        .decodeStream((InputStream) new URL(
+                                mUrl).getContent());
+            }
+            catch (Exception e)
+            {
+                Log.e("kidgeniustesting", e.getMessage());
+                return false;
+            }
+            return true;
+        }
+
+        /***
+         * If the image was loaded successfully, set the image view
+         */
+        @Override
+        protected void onPostExecute(Boolean loaded)
+        {
+            if (loaded)
+            {
+                ImageView eventPhoto = (ImageView) findViewById(R.id.eventPhoto);
+                eventPhoto.setImageBitmap(mBitmap);
+            }
+        }
+    }
+
+    /***
+     * Handle registering for the broadcast action
+     */
+    @Override
+    protected void onResume()
+    {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("blob.loaded");
+        registerReceiver(receiver, filter);
+        super.onResume();
+    }
+
+    /***
+     * Handle unregistering for broadcast action
+     */
+    @Override
+    protected void onPause()
+    {
+        unregisterReceiver(receiver);
+        super.onPause();
     }
 
     public void startRoute(View v)

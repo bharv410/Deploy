@@ -8,5 +8,6 @@
     <string name="title_activity_event_details">EventDetails</string>
     <string name="title_activity_contacts_list">ContactsList</string>
     <string name="title_activity_splash_screen">Deploy</string>
+    <string name="title_activity_photo_picker">PhotoPicker</string>
 
 </resources>
