@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.kidgeniusdesigns.deployapp.EventHome;
@@ -22,6 +23,8 @@ public class EventInfo extends Fragment
     static TextView partyCountdown, titleView, descrView,
             dateView, creatorView, startTimeView;
     public static ImageButton atButton;
+    
+    public static ImageView eventPhoto;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -54,6 +57,10 @@ public class EventInfo extends Fragment
         descrView = (TextView) getActivity().findViewById(
                 R.id.descrip);
         descrView.setText(EventHome.description);
+        
+        eventPhoto = (ImageView) getActivity().findViewById(
+                R.id.eventPhoto);
+        
         super.onActivityCreated(savedInstanceState);
     }
 

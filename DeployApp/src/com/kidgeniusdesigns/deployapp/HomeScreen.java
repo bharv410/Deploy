@@ -37,6 +37,8 @@ public class HomeScreen extends Activity
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
+    
+    private MobileServiceTable<EventsToImages> mEventsToImagesTable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -53,13 +55,16 @@ public class HomeScreen extends Activity
             mClient = new MobileServiceClient(
                     "https://droiddemo.azure-mobile.net/",
                     "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34",
-                    getApplicationContext())
-            // use getApplicationContext() instead of
-            // this reference. Garbage collection
-            // will not be called when this reference
-            // is used
+                    this)
                     .withFilter(new ProgressFilter());
             mToDoTable = mClient.getTable(Events.class);
+            
+            StorageService mStorageService = new StorageService(getApplicationContext());
+            
+            MobileServiceClient mImagesClient = mStorageService.getMobileServiceClient();
+            
+            mEventsToImagesTable = mImagesClient.
+                    getTable(EventsToImages.class);
         }
         catch (MalformedURLException e)
         {
@@ -95,7 +100,7 @@ public class HomeScreen extends Activity
 
     }
 
-    public void findItem(String eventCode)
+    public void findItem(final String eventCode)
     {
 
         mToDoTable.where().field("eventcode").eq(eventCode)
@@ -124,7 +129,7 @@ public class HomeScreen extends Activity
                             }
                             else
                             {
-                                Intent i = new Intent(
+                                final Intent i = new Intent(
                                         getApplicationContext(),
                                         EventHome.class);
                                 Events cur;
@@ -167,9 +172,49 @@ public class HomeScreen extends Activity
                                                                 }
                                                             }
                                                         });
+                                        
+                                        mEventsToImagesTable.where().field("eventCode").eq(eventCode)
+                                        .execute(new TableQueryCallback<EventsToImages>()
+                                        {
+
+                                            @Override
+                                            public void onCompleted(
+                                                    List<EventsToImages> result,
+                                                    int count,
+                                                    Exception exception,
+                                                    ServiceFilterResponse response)
+                                            {
+                                                if(exception == null)
+                                                {
+                                                    for(EventsToImages temp : result)
+                                                    {
+                                                        mEventsToImagesTable.delete(temp, new TableDeleteCallback()
+                                                        {
+
+                                                            @Override
+                                                            public void onCompleted(
+                                                                    Exception exception,
+                                                                    ServiceFilterResponse response)
+                                                            {
+                                                                
+                                                                
+                                                            }
+                                                            
+                                                        });
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    
+                                                }
+                                                
+                                            }
+                                            
+                                        });
                                     }
                                     else
                                     {
+                                        
 
                                         i.putExtra("title",
                                                 cur.getTitle());
@@ -191,7 +236,31 @@ public class HomeScreen extends Activity
                                                 getIntent()
                                                         .getStringExtra(
                                                                 "username"));
-                                        startActivity(i);
+                                        
+                                        mEventsToImagesTable.where().field("eventcode").eq(eventCode)
+                                        .execute(new TableQueryCallback<EventsToImages>()
+                                                {
+
+                                                    @Override
+                                                    public void onCompleted(
+                                                            List<EventsToImages> result,
+                                                            int count,
+                                                            Exception exception,
+                                                            ServiceFilterResponse response)
+                                                    {
+                                                        if(exception == null)
+                                                        {
+                                                            i.putExtra("imagename", result.get(0).getImageName());
+                                                            startActivity(i);
+                                                        }
+                                                        else
+                                                        {
+                                                            
+                                                        }
+                                                    }
+                                                    
+                                                });
+                                        
                                     }
                                 }
                             }
