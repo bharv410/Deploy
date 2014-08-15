@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/homeScreenLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/login"
@@ -18,7 +19,8 @@
         android:ems="10"
         android:gravity="center_horizontal"
         android:hint="Enter Event Code"
-        android:inputType="textPassword" >
+        android:inputType="textPassword"
+        android:textColor="@color/black" >
 
         <requestFocus />
     </EditText>

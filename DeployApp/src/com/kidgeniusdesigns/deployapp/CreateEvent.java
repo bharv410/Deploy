@@ -1,6 +1,8 @@
 package com.kidgeniusdesigns.deployapp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -11,6 +13,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +28,7 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -34,8 +44,7 @@ import android.widget.Filterable;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
-import com.coreform.open.android.formidablevalidation.ValidationManager;
+import com.androidquery.AQuery;
 import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
@@ -51,320 +60,514 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 
-public class CreateEvent extends FragmentActivity implements OnItemClickListener {
-	EditText eventTitle, eventCode, descripBox;
-	AutoCompleteTextView locationBox;
-	public static Calendar tilEvent;
-	private MobileServiceClient mClient;
-	private MobileServiceTable<Events> mToDoTable;
-	private ProgressBar mProgressBar;
-	String partyTime;
-	ValidationManager mValidationManager;
-	String[] titleHints, codeHints, locHints, descripHints;
-	
-	private static final String LOG_TAG = "GooglePlaces";
-	private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
-	private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
-	private static final String OUT_JSON = "/json";
-	private static final String API_KEY = "AIzaSyCgP3QVf6vpoGqZJxlMY84RnYRo_BZ8JbI";
+public class CreateEvent extends FragmentActivity implements
+        OnItemClickListener
+{
+    EditText eventTitle, eventCode, descripBox;
+    AutoCompleteTextView locationBox;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    // Android Query API for image downloading
+    private AQuery aq;
+    // use AsyncTask, possibly long loading time
+    private AsyncTask<Void,Void,String[]> imageNamePullAsyncTask;
+    private String[] imageNameArray;
+
+    public static Calendar tilEvent;
+    private MobileServiceClient mClient;
+    private MobileServiceTable<Events> mToDoTable;
+    private ProgressBar mProgressBar;
+    String partyTime;
+    ValidationManager mValidationManager;
+    String[] titleHints, codeHints, locHints, descripHints;
+
+    private static final String LOG_TAG = "GooglePlaces";
+    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
+    private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
+    private static final String OUT_JSON = "/json";
+    private static final String API_KEY = "AIzaSyCgP3QVf6vpoGqZJxlMY84RnYRo_BZ8JbI";
+    private static final String IMAGE_ADDRESS = "http://kidgeniustesting.cloudapp.net/deploy/";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.activity_create_event);
-		CreateEvent.tilEvent = Calendar.getInstance();
-		titleHints= new String[5];
-		codeHints= new String[5];
-		locHints= new String[5];
-		descripHints= new String[5];
-			titleHints[0]="Ben's Album Release";
-			titleHints[1]="Exclusive Diner";
-			titleHints[2]="Meet-and-Greet";
-			titleHints[3]="Meet me at Wawas";
-			codeHints[0]="example: bensalbrel213";
-			codeHints[1]="example: jaysdiner22";
-			codeHints[2]="example: secretgreet115";
-			codeHints[3]="example: wawas323";
-			locHints[0]="123 Motown Street Detrot, MI";
-			locHints[1]="555 Jay Diner Way Dayton, OH";
-			locHints[2]="5600 Starbuck lane, Los Angeles CA";
-			locHints[3]="Wawas Hickory Ridge Road Columbia, MD";
-			descripHints[0]="Come hear a sneak preview of my new album. Don't tell anyone the code bc they won't get in. I can see whoever views the details";
-		descripHints[1]="Thanks for attending our conference. You've been invited to our post-event dinner. Follow Deploy's instructions to make your way to our secret location.";
-			descripHints[2]="You are one of the few that hold the event code to meet with our surprise music artist who has agreed to sign some autographs.";
-			descripHints[3]="Whats up bud. Could you drop the kids off at wawas. Easily get directions or add to your calendar through this app.";
-			
-			
-		eventTitle = (EditText) findViewById(R.id.eventTitle);
-		
-		eventCode = (EditText) findViewById(R.id.eventCode);
-		
-		locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
-		
-		descripBox= (EditText) findViewById(R.id.descriptBox);
-		
-		
-		
-		
-		
-		locationBox.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
-		locationBox.setOnItemClickListener(this);
-		eventTitle.requestFocus();
-		mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
-		mProgressBar.setVisibility(ProgressBar.GONE);
-		
-		try {
-			mClient = new MobileServiceClient(
-					"https://droiddemo.azure-mobile.net/",
-					"uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
-					.withFilter(new ProgressFilter());
-			mToDoTable = mClient.getTable(Events.class);
-		} catch (Exception e) {
-			System.out.print("Coudnt get table");
-		}
-		
-		mValidationManager = new ValidationManager(this);
-		mValidationManager
-				.add("eventTitleError", new RegExpressionValueValidator(
-						eventCode, "^[a-zA-Z0-9\\-'\\s]{3,}$",
-						"please enter event code."));
-		mValidationManager
-				.add("eventTitleError", new RegExpressionValueValidator(
-						eventTitle, "^[a-zA-Z0-9\\-'\\s]{3,}$",
-						"please enter event title."));
-	}
-	
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        String str = (String) adapterView.getItemAtPosition(position);
-        Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
+        setContentView(R.layout.activity_create_event);
+
+        CreateEvent.tilEvent = Calendar.getInstance();
+        titleHints = new String[5];
+        codeHints = new String[5];
+        locHints = new String[5];
+        descripHints = new String[5];
+        titleHints[0] = "Ben's Album Release";
+        titleHints[1] = "Exclusive Diner";
+        titleHints[2] = "Meet-and-Greet";
+        titleHints[3] = "Meet me at Wawas";
+        codeHints[0] = "example: bensalbrel213";
+        codeHints[1] = "example: jaysdiner22";
+        codeHints[2] = "example: secretgreet115";
+        codeHints[3] = "example: wawas323";
+        locHints[0] = "123 Motown Street Detrot, MI";
+        locHints[1] = "555 Jay Diner Way Dayton, OH";
+        locHints[2] = "5600 Starbuck lane, Los Angeles CA";
+        locHints[3] = "Wawas Hickory Ridge Road Columbia, MD";
+        descripHints[0] = "Come hear a sneak preview of my new album. Don't tell anyone the code bc they won't get in. I can see whoever views the details";
+        descripHints[1] = "Thanks for attending our conference. You've been invited to our post-event dinner. Follow Deploy's instructions to make your way to our secret location.";
+        descripHints[2] = "You are one of the few that hold the event code to meet with our surprise music artist who has agreed to sign some autographs.";
+        descripHints[3] = "Whats up bud. Could you drop the kids off at wawas. Easily get directions or add to your calendar through this app.";
+
+        eventTitle = (EditText) findViewById(R.id.eventTitle);
+
+        eventCode = (EditText) findViewById(R.id.eventCode);
         
-        // replaced this reference with getApplicationContext()
-        
-        // this reference can lead to memory leaks if not careful
-        
-        // garbage collector will not free memory if this reference is used
+        // Android Query API for image downloading
+        aq = new AQuery(this);
+
+        // use AsyncTask, possibly long loading time
+        imageNamePullAsyncTask = new ImageNamePullAsyncTask().execute();
+
+        locationBox = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView1);
+
+        descripBox = (EditText) findViewById(R.id.descriptBox);
+
+        locationBox.setAdapter(new PlacesAutoCompleteAdapter(
+                this, R.layout.list_item));
+        locationBox.setOnItemClickListener(this);
+        eventTitle.requestFocus();
+        mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
+        mProgressBar.setVisibility(ProgressBar.GONE);
+
+        try
+        {
+            mClient = new MobileServiceClient(
+                    "https://droiddemo.azure-mobile.net/",
+                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
+                    .withFilter(new ProgressFilter());
+            mToDoTable = mClient.getTable(Events.class);
+        }
+        catch (Exception e)
+        {
+            System.out.print("Coudnt get table");
+        }
+
+        mValidationManager = new ValidationManager(this);
+        mValidationManager.add("eventTitleError",
+                new RegExpressionValueValidator(eventCode,
+                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
+                        "please enter event code."));
+        mValidationManager.add("eventTitleError",
+                new RegExpressionValueValidator(eventTitle,
+                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
+                        "please enter event title."));
     }
-	
-	public void choosePhoto(View v)
-	{
-	    // do something when Choose event photo button is pressed
-	}
-	
-	public void showDatePickerDialog(View v) {
-		DialogFragment newFragment = new DatePickerFragment();
-		newFragment.show(getFragmentManager(), "datePicker");
-	}
-	
-	public void showTimePickerDialog(View v) {
-		DialogFragment newFragment = new TimePickerFragment();
-		newFragment.show(getFragmentManager(), "timePicker");
-	}
-	
-	public void saveEvent(View v) {
-		if (mValidationManager.validateAllAndSetError()) {
-			addItem();
-		}
-	}
-	
-	public void addItem() {
-		String eventLocation = locationBox.getText().toString();
 
-		Date calTime = tilEvent.getTime();
-		String title = eventTitle.getText().toString();
-		String code = eventCode.getText().toString();
+    public void onItemClick(AdapterView<?> adapterView,
+            View view, int position, long id)
+    {
+        String str = (String) adapterView
+                .getItemAtPosition(position);
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+    }
 
-		Events item = new Events();
+    public void choosePhoto(View v)
+    {
+        try
+        {
+            imageNameArray = imageNamePullAsyncTask.get();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        if(imageNameArray != null)
+        {
+            for(int i = 0; i < imageNameArray.length; i++)
+            {
+                Log.i("kidgeniustesting", imageNameArray[i]);
+            }
+        }
+        
+        // pass imageNameArray and show pics
+    }
 
-		item.setTitle(title);
-		item.setEventCode(code);
-		Toast.makeText(getApplicationContext(), code, Toast.LENGTH_LONG).show();
-		item.setComplete(false);
-		item.setOwnerId(getIntent().getStringExtra("username"));
-		item.setLocation(eventLocation);
-		item.setTime(calTime.getTime());
-		if(!descripBox.getText().toString().equals(""))
-			item.setDescrip(descripBox.getText().toString());
-		
-		
-		mToDoTable.insert(item, new TableOperationCallback<Events>() {
+    public void showDatePickerDialog(View v)
+    {
+        DialogFragment newFragment = new DatePickerFragment();
+        newFragment.show(getFragmentManager(), "datePicker");
+    }
 
-			public void onCompleted(Events entity, Exception exception,
-					ServiceFilterResponse response) {
-				if (exception == null) {
-					Intent i = new Intent(getApplicationContext(),
-							HomeScreen.class);
-					i.putExtra("eventcode", entity.getEventCode());
-					startActivity(i);
-				} else {
-					Toast.makeText(getApplicationContext(), "error saving",
-							Toast.LENGTH_LONG).show();
-				}
-			}
-		});
+    public void showTimePickerDialog(View v)
+    {
+        DialogFragment newFragment = new TimePickerFragment();
+        newFragment.show(getFragmentManager(), "timePicker");
+    }
 
-//alarm to notify of creator options
-		AlertDialog.Builder builder = new AlertDialog.Builder(CreateEvent.this);
-		// 2. Chain together various setter methods to set the dialog characteristics
-		builder.setMessage("To edit details \n View Attendees \n Invite Friends")
-		       .setTitle("Click the green gear on the home screen");
+    public void saveEvent(View v)
+    {
+        if (mValidationManager.validateAllAndSetError())
+        {
+            addItem();
+        }
+    }
 
-		// 3. Get the AlertDialog from create()
-		AlertDialog dialog = builder.create();
-		dialog.show();
-	}
-	
-	@Override
-	public void onResume() {
-	    super.onResume();  // Always call the superclass method first
-	    Random rg = new Random();
-	    int rand=rg.nextInt(4);
-	    System.out.println(String.valueOf(rand));
-	    System.out.println(String.valueOf(rand));
-	    System.out.println(String.valueOf(rand));
-	    System.out.println(String.valueOf(rand));
-	    System.out.println(String.valueOf(rand));
-	    System.out.println(String.valueOf(rand));
-	    eventTitle.setHint(titleHints[rand]);
-	    eventCode.setHint(codeHints[rand]);
-	    locationBox.setHint(locHints[rand]);
-		descripBox.setHint(descripHints[rand]);
-	}
-	
-	private class ProgressFilter implements ServiceFilter {
+    public void addItem()
+    {
+        String eventLocation = locationBox.getText().toString();
 
-		@Override
-		public void handleRequest(ServiceFilterRequest request,
-				NextServiceFilterCallback nextServiceFilterCallback,
-				final ServiceFilterResponseCallback responseCallback) {
-			runOnUiThread(new Runnable() {
+        Date calTime = tilEvent.getTime();
+        String title = eventTitle.getText().toString();
+        String code = eventCode.getText().toString();
 
-				@Override
-				public void run() {
-					if (mProgressBar != null)
-						mProgressBar.setVisibility(ProgressBar.VISIBLE);
-				}
-			});
+        Events item = new Events();
 
-			nextServiceFilterCallback.onNext(request,
-					new ServiceFilterResponseCallback() {
+        item.setTitle(title);
+        item.setEventCode(code);
+        Toast.makeText(getApplicationContext(), code,
+                Toast.LENGTH_LONG).show();
+        item.setComplete(false);
+        item.setOwnerId(getIntent().getStringExtra("username"));
+        item.setLocation(eventLocation);
+        item.setTime(calTime.getTime());
+        if (!descripBox.getText().toString().equals(""))
+            item.setDescrip(descripBox.getText().toString());
 
-						@Override
-						public void onResponse(ServiceFilterResponse response,
-								Exception exception) {
-							runOnUiThread(new Runnable() {
+        mToDoTable.insert(item,
+                new TableOperationCallback<Events>()
+                {
 
-								@Override
-								public void run() {
-									if (mProgressBar != null)
-										mProgressBar
-												.setVisibility(ProgressBar.GONE);
-								}
-							});
+                    public void onCompleted(Events entity,
+                            Exception exception,
+                            ServiceFilterResponse response)
+                    {
+                        if (exception == null)
+                        {
+                            Intent i = new Intent(
+                                    getApplicationContext(),
+                                    HomeScreen.class);
+                            i.putExtra("eventcode",
+                                    entity.getEventCode());
+                            startActivity(i);
+                        }
+                        else
+                        {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "error saving",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
 
-							if (responseCallback != null)
-								responseCallback
-										.onResponse(response, exception);
-						}
-					});
-		}
-	}
-	
-	private ArrayList<String> autocomplete(String input) {
-	    ArrayList<String> resultList = null;
+        // alarm to notify of creator options
+        AlertDialog.Builder builder = new AlertDialog.Builder(
+                CreateEvent.this);
+        // 2. Chain together various setter methods to set the dialog
+        // characteristics
+        builder.setMessage(
+                "To edit details \n View Attendees \n Invite Friends")
+                .setTitle(
+                        "Click the green gear on the home screen");
 
-	    HttpURLConnection conn = null;
-	    StringBuilder jsonResults = new StringBuilder();
-	    try {
-	        StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
-	        sb.append("?sensor=false&key=" + API_KEY);
-	        sb.append("&components=country:us");
-	        sb.append("&input=" + URLEncoder.encode(input, "utf8"));
+        // 3. Get the AlertDialog from create()
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 
-	        URL url = new URL(sb.toString());
-	        conn = (HttpURLConnection) url.openConnection();
-	        InputStreamReader in = new InputStreamReader(conn.getInputStream());
+    @Override
+    public void onResume()
+    {
+        super.onResume(); // Always call the superclass method first
+        Random rg = new Random();
+        int rand = rg.nextInt(4);
+        System.out.println(String.valueOf(rand));
+        System.out.println(String.valueOf(rand));
+        System.out.println(String.valueOf(rand));
+        System.out.println(String.valueOf(rand));
+        System.out.println(String.valueOf(rand));
+        System.out.println(String.valueOf(rand));
+        eventTitle.setHint(titleHints[rand]);
+        eventCode.setHint(codeHints[rand]);
+        locationBox.setHint(locHints[rand]);
+        descripBox.setHint(descripHints[rand]);
+    }
 
-	        // Load the results into a StringBuilder
-	        int read;
-	        char[] buff = new char[1024];
-	        while ((read = in.read(buff)) != -1) {
-	            jsonResults.append(buff, 0, read);
-	        }
-	    } catch (MalformedURLException e) {
-	        Log.e(LOG_TAG, "Error processing Places API URL", e);
-	        return resultList;
-	    } catch (IOException e) {
-	        Log.e(LOG_TAG, "Error connecting to Places API", e);
-	        return resultList;
-	    } finally {
-	        if (conn != null) {
-	            conn.disconnect();
-	        }
-	    }
+    private class ProgressFilter implements ServiceFilter
+    {
 
-	    try {
-	        // Create a JSON object hierarchy from the results
-	        JSONObject jsonObj = new JSONObject(jsonResults.toString());
-	        JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
+        @Override
+        public void handleRequest(
+                ServiceFilterRequest request,
+                NextServiceFilterCallback nextServiceFilterCallback,
+                final ServiceFilterResponseCallback responseCallback)
+        {
+            runOnUiThread(new Runnable()
+            {
 
-	        // Extract the Place descriptions from the results
-	        resultList = new ArrayList<String>(predsJsonArray.length());
-	        for (int i = 0; i < predsJsonArray.length(); i++) {
-	            resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
-	        }
-	    } catch (JSONException e) {
-	        Log.e(LOG_TAG, "Cannot process JSON results", e);
-	    }
+                @Override
+                public void run()
+                {
+                    if (mProgressBar != null)
+                        mProgressBar
+                                .setVisibility(ProgressBar.VISIBLE);
+                }
+            });
 
-	    return resultList;
-	}
-	
-	private class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
-	    private ArrayList<String> resultList;
+            nextServiceFilterCallback.onNext(request,
+                    new ServiceFilterResponseCallback()
+                    {
 
-	    public PlacesAutoCompleteAdapter(Context context, int textViewResourceId) {
-	        super(context, textViewResourceId);
-	    }
+                        @Override
+                        public void onResponse(
+                                ServiceFilterResponse response,
+                                Exception exception)
+                        {
+                            runOnUiThread(new Runnable()
+                            {
 
-	    @Override
-	    public int getCount() {
-	        return resultList.size();
-	    }
+                                @Override
+                                public void run()
+                                {
+                                    if (mProgressBar != null)
+                                        mProgressBar
+                                                .setVisibility(ProgressBar.GONE);
+                                }
+                            });
 
-	    @Override
-	    public String getItem(int index) {
-	        return resultList.get(index);
-	    }
+                            if (responseCallback != null)
+                                responseCallback.onResponse(
+                                        response, exception);
+                        }
+                    });
+        }
+    }
 
-	    @Override
-	    public Filter getFilter() {
-	        Filter filter = new Filter() {
-	            @Override
-	            protected FilterResults performFiltering(CharSequence constraint) {
-	                FilterResults filterResults = new FilterResults();
-	                if (constraint != null) {
-	                    // Retrieve the autocomplete results.
-	                    resultList = autocomplete(constraint.toString());
+    private ArrayList<String> autocomplete(String input)
+    {
+        ArrayList<String> resultList = null;
 
-	                    // Assign the data to the FilterResults
-	                    filterResults.values = resultList;
-	                    filterResults.count = resultList.size();
-	                }
-	                return filterResults;
-	            }
+        HttpURLConnection conn = null;
+        StringBuilder jsonResults = new StringBuilder();
+        try
+        {
+            StringBuilder sb = new StringBuilder(
+                    PLACES_API_BASE + TYPE_AUTOCOMPLETE
+                            + OUT_JSON);
+            sb.append("?sensor=false&key=" + API_KEY);
+            sb.append("&components=country:us");
+            sb.append("&input="
+                    + URLEncoder.encode(input, "utf8"));
 
-	            @Override
-	            protected void publishResults(CharSequence constraint, FilterResults results) {
-	                if (results != null && results.count > 0) {
-	                    notifyDataSetChanged();
-	                }
-	                else {
-	                    notifyDataSetInvalidated();
-	                }
-	            }};
-	        return filter;
-	    }
-	}
+            URL url = new URL(sb.toString());
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(
+                    conn.getInputStream());
+
+            // Load the results into a StringBuilder
+            int read;
+            char[] buff = new char[1024];
+            while ((read = in.read(buff)) != -1)
+            {
+                jsonResults.append(buff, 0, read);
+            }
+        }
+        catch (MalformedURLException e)
+        {
+            Log.e(LOG_TAG, "Error processing Places API URL", e);
+            return resultList;
+        }
+        catch (IOException e)
+        {
+            Log.e(LOG_TAG, "Error connecting to Places API", e);
+            return resultList;
+        }
+        finally
+        {
+            if (conn != null)
+            {
+                conn.disconnect();
+            }
+        }
+
+        try
+        {
+            // Create a JSON object hierarchy from the results
+            JSONObject jsonObj = new JSONObject(
+                    jsonResults.toString());
+            JSONArray predsJsonArray = jsonObj
+                    .getJSONArray("predictions");
+
+            // Extract the Place descriptions from the results
+            resultList = new ArrayList<String>(
+                    predsJsonArray.length());
+            for (int i = 0; i < predsJsonArray.length(); i++)
+            {
+                resultList.add(predsJsonArray.getJSONObject(i)
+                        .getString("description"));
+            }
+        }
+        catch (JSONException e)
+        {
+            Log.e(LOG_TAG, "Cannot process JSON results", e);
+        }
+
+        return resultList;
+    }
+
+    private class PlacesAutoCompleteAdapter extends
+            ArrayAdapter<String> implements Filterable
+    {
+        private ArrayList<String> resultList;
+
+        public PlacesAutoCompleteAdapter(Context context,
+                int textViewResourceId)
+        {
+            super(context, textViewResourceId);
+        }
+
+        @Override
+        public int getCount()
+        {
+            return resultList.size();
+        }
+
+        @Override
+        public String getItem(int index)
+        {
+            return resultList.get(index);
+        }
+
+        @Override
+        public Filter getFilter()
+        {
+            Filter filter = new Filter()
+            {
+                @Override
+                protected FilterResults performFiltering(
+                        CharSequence constraint)
+                {
+                    FilterResults filterResults = new FilterResults();
+                    if (constraint != null)
+                    {
+                        // Retrieve the autocomplete results.
+                        resultList = autocomplete(constraint
+                                .toString());
+
+                        // Assign the data to the FilterResults
+                        filterResults.values = resultList;
+                        filterResults.count = resultList.size();
+                    }
+                    return filterResults;
+                }
+
+                @Override
+                protected void publishResults(
+                        CharSequence constraint,
+                        FilterResults results)
+                {
+                    if (results != null && results.count > 0)
+                    {
+                        notifyDataSetChanged();
+                    }
+                    else
+                    {
+                        notifyDataSetInvalidated();
+                    }
+                }
+            };
+            return filter;
+        }
+    }
+
+    /**
+     * Used to download image names from server in background thread
+     * 
+     *
+     */
+    public class ImageNamePullAsyncTask extends
+            AsyncTask<Void, Void, String[]>
+    {   
+        @Override
+        protected String[] doInBackground(Void... params)
+        {
+            String[] imageNames = null;
+
+            try
+            {
+                JSONArray jsonArray = new JSONArray(
+                        getImageNames());
+
+                imageNames = new String[jsonArray.length()];
+
+                for (int i = 0; i < imageNames.length; i++)
+                {
+                    imageNames[i] = jsonArray
+                            .getString(i);
+                    
+                    imageNames[i] = imageNames[i].replace("\\", "");
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            return imageNames;
+        }
+        
+        @Override
+        protected void onPostExecute(String[] result)
+        {
+            if(result != null)
+            {
+                Random rg = new Random();
+                int rand = rg.nextInt(result.length);
+                
+                aq.id(R.id.eventPhotoImage).image(
+                        IMAGE_ADDRESS + result[rand]);
+            }
+        }
+
+        private String getImageNames()
+        {
+            StringBuilder builder = new StringBuilder();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet httpGet = new HttpGet(
+                    IMAGE_ADDRESS + "images.php");
+            try
+            {
+                HttpResponse response = client.execute(httpGet);
+                StatusLine statusLine = response
+                        .getStatusLine();
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == 200)
+                {
+                    HttpEntity entity = response.getEntity();
+                    InputStream content = entity.getContent();
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(content));
+                    String line;
+                    while ((line = reader.readLine()) != null)
+                    {
+                        builder.append(line);
+                    }
+                }
+                else
+                {
+                    Log.e("kidgeniustesting",
+                            "Failed to download file");
+                }
+            }
+            catch (ClientProtocolException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            
+            return builder.toString();
+        }
+    }
 }
-
