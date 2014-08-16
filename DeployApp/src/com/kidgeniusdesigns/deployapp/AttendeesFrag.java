@@ -31,6 +31,9 @@ public class AttendeesFrag extends ListFragment
                 R.layout.simplest_list_item,
                 CreatorDetailsActivity.attendeesList);
         setListAdapter(adapter);
+        Toast.makeText(getActivity(), "Loading contacts.", Toast.LENGTH_SHORT).show();;
+        Toast.makeText(getActivity(), "Loading contacts..", Toast.LENGTH_SHORT).show();;
+        Toast.makeText(getActivity(), "Loading contacts...", Toast.LENGTH_SHORT).show();;
     }
 
     @Override
@@ -39,9 +42,9 @@ public class AttendeesFrag extends ListFragment
     {
 
         Toast.makeText(
-                getActivity(),
+                getActivity(),"Soon when you swipe "+
                 CreatorDetailsActivity.attendeesList
-                        .get(position), Toast.LENGTH_LONG)
+                        .get(position)+" won't be able to ever see the details again", Toast.LENGTH_LONG)
                 .show();
 
     }

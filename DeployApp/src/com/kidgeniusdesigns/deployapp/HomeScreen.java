@@ -3,9 +3,12 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +19,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -36,6 +40,7 @@ public class HomeScreen extends Activity
     private ProgressBar mProgressBar;
     private String enteredCode;
     private MobileServiceTable<EventsToImages> mEventsToImagesTable;
+    ProgressDialog barProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -43,6 +48,30 @@ public class HomeScreen extends Activity
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
+        
+        MainActivity.timesOnHomeScreen++;
+        if(MainActivity.timesOnHomeScreen>1 && MainActivity.timesOnHomeScreen<4){
+        	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+    				HomeScreen.this);
+     
+    			// set title
+    			alertDialogBuilder.setTitle("Congrats on create an event!");
+     
+    			// set dialog message
+    			alertDialogBuilder
+    				.setMessage("-Edit details\n-Invite contacts\n-See who viewed\n Just type '"+ getIntent().getStringExtra("eventcode") +"'\nand click the green settings gear")
+    				.setCancelable(false)
+    				.setPositiveButton("Got it!",new DialogInterface.OnClickListener() {
+    					public void onClick(DialogInterface dialog,int id) {
+    						dialog.cancel();
+    					}
+    				  });
+    				// create alert dialog
+    				AlertDialog alertDialog = alertDialogBuilder.create();
+     
+    				// show it
+    				alertDialog.show();
+        }
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);

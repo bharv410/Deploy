@@ -18,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -207,6 +206,10 @@ public class CreateEvent extends FragmentActivity implements
 
     public void saveEvent(View v)
     {
+    	if (mProgressBar != null)
+            mProgressBar
+                    .setVisibility(ProgressBar.VISIBLE);
+    	
 //        if (mValidationManager.validateAllAndSetError())
 //        {
             uploadImage();
@@ -298,6 +301,10 @@ public class CreateEvent extends FragmentActivity implements
                                 Exception exception,
                                 ServiceFilterResponse response)
                         {
+                        	if (mProgressBar != null)
+                                mProgressBar
+                                        .setVisibility(ProgressBar.GONE);
+                        	
                             if (exception == null)
                             {
                                 Intent i = new Intent(
@@ -318,21 +325,6 @@ public class CreateEvent extends FragmentActivity implements
                         }
                     });
         }
-
-        // alarm to notify of creator options
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                CreateEvent.this);
-
-        // 2. Chain together various setter methods to set the dialog
-        // characteristics
-        builder.setMessage(
-                "To edit details \n View Attendees \n Invite Friends")
-                .setTitle(
-                        "Click the green gear on the home screen");
-
-        // 3. Get the AlertDialog from create()
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     /***

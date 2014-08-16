@@ -261,7 +261,7 @@ public class StorageService
         // Create the json Object we'll send over and fill it with the required
         // id property - otherwise we'll get kicked back
         JsonObject blob = new JsonObject();
-        blob.addProperty("id", 0);
+        blob.addProperty("id", 1);
         // Create parameters to pass in the blob details. We do this with params
         // because it would be stripped out if we put it on the blob object
         List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
@@ -279,12 +279,11 @@ public class StorageService
                     {
                         if (exception != null)
                         {
-                            Log.e(TAG, exception.getCause()
-                                    .getMessage());
+                            exception.printStackTrace();
                             return;
                         }
                         // Refetch the blobs from the server
-                        getBlobsForContainer(containerName);
+                        //getBlobsForContainer(containerName);
                     }
                 });
     }
