@@ -16,7 +16,6 @@ public class ChoosePhoto extends Activity
     public void onCreate(Bundle b)
     {
         super.onCreate(b);
-        
         /*
         Thread.currentThread().setContextClassLoader(new ClassLoader() {
             @Override
@@ -29,10 +28,10 @@ public class ChoosePhoto extends Activity
         });
         */
 
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent, 9513);
+        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        i.setType("image/*");
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(i, 9513);
     }
 
     // Result handler for any intents started with startActivityForResult
