@@ -48,6 +48,11 @@ Google Maps Android API v2, but are recommended.
             android:name="com.kidgeniusdesigns.deployapp.HomeScreen"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo" >
+            
+            <intent-filter>
+                <action android:name="blob.deleted" >
+                </action>              
+            </intent-filter>
         </activity>
         <activity
             android:name="com.kidgeniusdesigns.deployapp.EventHome"
