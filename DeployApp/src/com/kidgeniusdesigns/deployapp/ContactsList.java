@@ -1,6 +1,7 @@
 package com.kidgeniusdesigns.deployapp;
 
 import java.util.ArrayList;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
@@ -15,7 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.kidgeniusdesigns.realdeploy.R;
 
 public class ContactsList extends Fragment
@@ -151,15 +152,7 @@ public class ContactsList extends Fragment
                                 CheckBox cb = (CheckBox) v;
                                 Contact contact = (Contact) cb
                                         .getTag();
-                                Toast.makeText(
-                                        getActivity()
-                                                .getApplicationContext(),
-                                        " "
-                                                + cb.getText()
-                                                + " is "
-                                                + cb.isChecked(),
-                                        Toast.LENGTH_LONG)
-                                        .show();
+                                
                                 contact.setChecked(cb
                                         .isChecked());
                             }

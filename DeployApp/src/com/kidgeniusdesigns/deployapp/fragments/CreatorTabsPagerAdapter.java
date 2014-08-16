@@ -29,6 +29,8 @@ public class CreatorTabsPagerAdapter extends
                 return (Fragment) new AttendeesFrag();
             case 2:
                 return new ContactsList();
+            case 3:
+            	return new MyEventsFrag();
         }
 
         return null;
@@ -38,6 +40,6 @@ public class CreatorTabsPagerAdapter extends
     public int getCount()
     {
         // get item count - equal to number of tabs
-        return 3;
+        return 4;
     }
 }

@@ -28,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bugsense.trace.BugSenseHandler;
@@ -56,6 +57,8 @@ public class EventHome extends FragmentActivity
     public static GeoPoint eventLatLng;
 
     public StorageService mStorageService;
+    
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -82,6 +85,11 @@ public class EventHome extends FragmentActivity
         description = intent.getStringExtra("descrip");
 
         imageName = intent.getStringExtra("imagename");
+        
+        mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
+        
+        if(mProgressBar != null)
+            mProgressBar.setVisibility(ProgressBar.VISIBLE);
 
         mStorageService = new StorageService(
                 getApplicationContext());
@@ -202,6 +210,11 @@ public class EventHome extends FragmentActivity
             {
                 ImageView eventPhoto = (ImageView) findViewById(R.id.eventPhoto);
                 eventPhoto.setImageBitmap(mBitmap);
+                
+                mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
+                
+                if(mProgressBar != null)
+                    mProgressBar.setVisibility(ProgressBar.GONE);
             }
         }
     }

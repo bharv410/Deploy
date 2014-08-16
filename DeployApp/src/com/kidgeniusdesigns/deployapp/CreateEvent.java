@@ -248,6 +248,7 @@ public class CreateEvent extends FragmentActivity implements
                 ChoosePhoto.class);
         intent.putExtra("username",
                 getIntent().getStringExtra("username"));
+        intent.putExtra("imageURI", imageURI);
         intent.putExtra("title", title);
         intent.putExtra("code", code);
         intent.putExtra("location", location);
