@@ -138,6 +138,40 @@ public class CreateEvent extends FragmentActivity implements
         eventTitle.requestFocus();
         mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
         mProgressBar.setVisibility(ProgressBar.GONE);
+        
+        Intent prev = getIntent();
+        
+        String title = prev.getStringExtra("title");
+        
+        String code = prev.getStringExtra("code");
+        
+        String location = prev.getStringExtra("location");
+        
+        String descrip = prev.getStringExtra("descrip");
+        
+        if(title != null && 
+                !title.equals(""))
+        {
+            eventTitle.setText(title);
+        }
+        
+        if(code != null && 
+                !code.equals(""))
+        {
+            eventCode.setText(code);
+        }
+        
+        if(location != null && 
+                !location.equals(""))
+        {
+            locationBox.setText(location);
+        }
+        
+        if(descrip != null && 
+                !descrip.equals(""))
+        {
+            descripBox.setText(descrip);
+        }
 
         try
         {
@@ -185,10 +219,39 @@ public class CreateEvent extends FragmentActivity implements
 
     public void choosePhoto(View v)
     {
+        String title = null;
+        String code = null;
+        String location = null;
+        String descrip = null;
+        
+        if(eventTitle.getText() != null)
+        {
+            title = eventTitle.getText().toString();
+        }
+        
+        if(eventCode.getText() != null)
+        {
+            code = eventCode.getText().toString();
+        }
+        
+        if(locationBox.getText() != null)
+        {
+            location = locationBox.getText().toString();
+        }
+        
+        if(descripBox.getText() != null)
+        {
+            descrip = descripBox.getText().toString();
+        }
+        
         Intent intent = new Intent(getApplicationContext(),
                 ChoosePhoto.class);
         intent.putExtra("username",
                 getIntent().getStringExtra("username"));
+        intent.putExtra("title", title);
+        intent.putExtra("code", code);
+        intent.putExtra("location", location);
+        intent.putExtra("descrip", descrip);
         startActivity(intent);
     }
 

@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -20,10 +18,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
-import com.kidgeniusdesigns.realdeploy.R;
 import com.kidgeniusdesigns.deployapp.fragments.Attendee;
+import com.kidgeniusdesigns.deployapp.fragments.BlockedMembers;
 import com.kidgeniusdesigns.deployapp.fragments.CreatorTabsPagerAdapter;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
+import com.kidgeniusdesigns.realdeploy.R;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
@@ -58,6 +57,7 @@ public class CreatorDetailsActivity extends FragmentActivity
         pager.setAdapter(pageAdapter);
         attendeesList = new ArrayList<String>();
         attendeesList.add("Mr. Miyogi");
+        attendeesList.add("Benjamin Harvey checked in");
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         creator = intent.getStringExtra("creator");
@@ -249,5 +249,23 @@ public class CreatorDetailsActivity extends FragmentActivity
                     }
                 });
 
+    }
+    
+    public void blockFromList(String username){
+    	String currentEventCode=eventCode;
+    	
+    	String[] getFirstandLastName = username.split("\\s+");
+    	final String blockThisPerson=getFirstandLastName[0]+" "+getFirstandLastName[1];
+    	
+    	BlockedMembers blockHim = new BlockedMembers(blockThisPerson,currentEventCode);
+    	mClient.getTable(BlockedMembers.class).insert(blockHim, new TableOperationCallback<BlockedMembers>() {
+    	      public void onCompleted(BlockedMembers entity, Exception exception, ServiceFilterResponse response) {
+    	            if (exception == null) {
+    	                  Toast.makeText(getApplicationContext(), "Blocked " +blockThisPerson +" from using event code "+ eventCode, Toast.LENGTH_LONG).show();
+    	            } else {
+    	                  // Insert failed
+    	            }
+    	      }
+    	});
     }
 }

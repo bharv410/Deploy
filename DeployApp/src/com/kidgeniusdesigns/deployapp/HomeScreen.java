@@ -3,13 +3,17 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -20,7 +24,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.deployapp.CreateEvent.ImageUploaderTask;
+import com.kidgeniusdesigns.deployapp.fragments.BlockedMembers;
 import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
@@ -107,7 +114,42 @@ public class HomeScreen extends Activity
             inputManager.hideSoftInputFromWindow(
                     eventCode.getApplicationWindowToken(),
                     InputMethodManager.HIDE_NOT_ALWAYS);
-            findItem(enteredCode);
+            
+            mClient.getTable(BlockedMembers.class).where().field("blockedname").eq(getIntent()
+                    .getStringExtra(
+                            "username"))
+            .execute(new TableQueryCallback<BlockedMembers>()
+            {
+                public void onCompleted(
+                        List<BlockedMembers> result, int count,
+                        Exception exception,
+                        ServiceFilterResponse response)
+                {
+                    if (exception == null && result.size()>0)
+                    {//means that the user has been blocked. check
+                    	for(BlockedMembers e: result){
+                    		if(e.getEventCode().contains(enteredCode)){
+                    			//user was blocked from the event
+                    			Toast toast = Toast
+                                        .makeText(
+                                                getApplicationContext(),
+                                                "Invalid Event Id",
+                                                Toast.LENGTH_LONG);
+                                toast.setGravity(
+                                        Gravity.TOP
+                                                | Gravity.CENTER_HORIZONTAL,
+                                        0, 0);
+                                toast.show();
+                    		}
+                    	}
+                    	
+                    }else{
+                    	//not blocked so show the event
+                    	findItem(enteredCode);
+                    }
+                }
+            }
+            );
         }
         else
         {
@@ -121,185 +163,306 @@ public class HomeScreen extends Activity
 
     public void findItem(final String eventCode)
     {
-        mToDoTable.where().field("eventcode").eq(eventCode)
-                .execute(new TableQueryCallback<Events>()
+        if(eventCode.equals("clearupoldevents"))
+        {
+            clearUpOldEvents();
+        }
+        else
+        {
+            findEventCode(eventCode);
+        }
+    }
+    
+    public void clearUpOldEvents()
+    {
+        mToDoTable.execute(new TableQueryCallback<Events>()
                 {
+
+                    @Override
                     public void onCompleted(
                             List<Events> result, int count,
                             Exception exception,
                             ServiceFilterResponse response)
                     {
-                        if (exception == null)
+                        if(exception == null)
                         {
-                            if (result.size() < 1)
+                            Events cur;
+                            for(Events res : result)
                             {
-                                Toast toast = Toast
-                                        .makeText(
-                                                getApplicationContext(),
-                                                "Invalid Event Id",
-                                                Toast.LENGTH_LONG);
-                                toast.setGravity(
-                                        Gravity.TOP
-                                                | Gravity.CENTER_HORIZONTAL,
-                                        0, 0);
-                                toast.show();
-                            }
-                            else
-                            {
-                                final Intent i = new Intent(
-                                        getApplicationContext(),
-                                        EventHome.class);
-                                Events cur;
-                                for (Events res : result)
+                                cur = res;
+                                
+                                Calendar c = Calendar
+                                        .getInstance();
+                                long millisToday = c
+                                        .getTimeInMillis();
+                                long tilEvent = (long) (cur
+                                        .getTime() - millisToday);
+                                // if event passed then exit
+                                if (tilEvent < 0)
                                 {
-                                    cur = res;
-                                    Calendar c = Calendar
-                                            .getInstance();
-                                    long millisToday = c
-                                            .getTimeInMillis();
-                                    long tilEvent = (long) (cur
-                                            .getTime() - millisToday);
-                                    // if event passed then exit
-                                    if (tilEvent < 0)
+                                    mToDoTable.delete(cur, new TableDeleteCallback()
                                     {
-                                        // if event has passed then delete it
-                                        mToDoTable
-                                                .delete(cur,
-                                                        new TableDeleteCallback()
+
+                                        @Override
+                                        public void onCompleted(
+                                                Exception exception,
+                                                ServiceFilterResponse response)
+                                        {
+                                            if(exception == null)
+                                            {
+                                                Log.i("CHeck",
+                                                        "Object deleted");
+                                            }
+                                            
+                                        }
+                                        
+                                    });
+                                    
+                                    mEventsToImagesTable
+                                    .where()
+                                    .field("eventCode")
+                                    .eq(cur.getEventCode())
+                                    .execute(
+                                            new TableQueryCallback<EventsToImages>()
+                                            {
+                                                @Override
+                                                public void onCompleted(
+                                                        List<EventsToImages> result,
+                                                        int count,
+                                                        Exception exception,
+                                                        ServiceFilterResponse response)
+                                                {
+                                                    if (exception == null)
+                                                    {
+                                                        for (EventsToImages temp : result)
                                                         {
-                                                            public void onCompleted(
-                                                                    Exception exception,
-                                                                    ServiceFilterResponse response)
+                                                            mEventsToImagesTable
+                                                                    .delete(temp,
+                                                                            new TableDeleteCallback()
+                                                                            {
+                                                                                @Override
+                                                                                public void onCompleted(
+                                                                                        Exception exception,
+                                                                                        ServiceFilterResponse response)
+                                                                                {
+                                                                                    if(exception == null)
+                                                                                    {
+                                                                                        Log.i("CHeck", "eventToImages deleted");
+                                                                                    }
+                                                                                }
+                                                                            });
+                                                            
+                                                            String imageName = temp.getImageName();
+                                                            
+                                                            if(imageName != null && !imageName.equals("deployicon"))
                                                             {
-                                                                if (exception == null)
-                                                                {
-                                                                    Log.i("CHeck",
-                                                                            "Object deleted");
-                                                                    Toast toast = Toast
-                                                                            .makeText(
-                                                                                    getApplicationContext(),
-                                                                                    "Invalid Event Id",
-                                                                                    Toast.LENGTH_LONG);
-                                                                    toast.setGravity(
-                                                                            Gravity.TOP
-                                                                                    | Gravity.CENTER_HORIZONTAL,
-                                                                            0,
-                                                                            0);
-                                                                    toast.show();
-                                                                }
+                                                            
+                                                                StorageService mStorageService = new StorageService(
+                                                                        getApplicationContext());
+                                                                
+                                                                mStorageService.deleteBlob("deployimages", temp.getImageName());
                                                             }
-                                                        });
-                                        mEventsToImagesTable
-                                                .where()
-                                                .field("eventCode")
-                                                .eq(eventCode)
-                                                .execute(
-                                                        new TableQueryCallback<EventsToImages>()
-                                                        {
-                                                            @Override
-                                                            public void onCompleted(
-                                                                    List<EventsToImages> result,
-                                                                    int count,
-                                                                    Exception exception,
-                                                                    ServiceFilterResponse response)
-                                                            {
-                                                                if (exception == null)
-                                                                {
-                                                                    for (EventsToImages temp : result)
-                                                                    {
-                                                                        mEventsToImagesTable
-                                                                                .delete(temp,
-                                                                                        new TableDeleteCallback()
-                                                                                        {
-                                                                                            @Override
-                                                                                            public void onCompleted(
-                                                                                                    Exception exception,
-                                                                                                    ServiceFilterResponse response)
-                                                                                            {
-                                                                                            }
-                                                                                        });
-                                                                        
-                                                                        String imageName = temp.getImageName();
-                                                                        
-                                                                        if(imageName != null && !imageName.equals("deployicon"))
-                                                                        {
-                                                                        
-                                                                            StorageService mStorageService = new StorageService(
-                                                                                    getApplicationContext());
-                                                                            
-                                                                            mStorageService.deleteBlob("deployimages", temp.getImageName());
-                                                                        }
-                                                                    }
-                                                                }
-                                                                else
-                                                                {
-                                                                }
-                                                            }
-                                                        });
-                                    }
-                                    else
-                                    {
-                                        i.putExtra("title",
-                                                cur.getTitle());
-                                        i.putExtra(
-                                                "location",
-                                                cur.getLocation());
-                                        i.putExtra("eventtime",
-                                                cur.getTime());
-                                        i.putExtra("code", cur
-                                                .getEventCode());
-                                        i.putExtra(
-                                                "creator",
-                                                cur.getOwnerId());
-                                        i.putExtra(
-                                                "descrip",
-                                                cur.getDescrip());
-                                        i.putExtra(
-                                                "username",
-                                                getIntent()
-                                                        .getStringExtra(
-                                                                "username"));
-                                        mEventsToImagesTable
-                                                .where()
-                                                .field("eventcode")
-                                                .eq(eventCode)
-                                                .execute(
-                                                        new TableQueryCallback<EventsToImages>()
-                                                        {
-                                                            @Override
-                                                            public void onCompleted(
-                                                                    List<EventsToImages> result,
-                                                                    int count,
-                                                                    Exception exception,
-                                                                    ServiceFilterResponse response)
-                                                            {
-                                                            	//if no error AND IF THEIR IS RLY A PIC AVAILABLE
-                                                                if (exception == null && result.size()>0)
-                                                                {
-                                                                    i.putExtra(
-                                                                            "imagename",
-                                                                            result.get(
-                                                                                    0)
-                                                                                    .getImageName());
-                                                                    startActivity(i);
-                                                                }
-                                                                else
-                                                                {//else proceed without a pic
-                                                                	startActivity(i);
-                                                                }
-                                                            }
-                                                        });
-                                    }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                    }
+                                                }
+                                            });
                                 }
                             }
                         }
-                        else
+                        
+                    }
+            
+                });
+    }
+    
+    public void findEventCode(final String eventCode)
+    {
+        mToDoTable.where().field("eventcode").eq(eventCode)
+        .execute(new TableQueryCallback<Events>()
+        {
+            public void onCompleted(
+                    List<Events> result, int count,
+                    Exception exception,
+                    ServiceFilterResponse response)
+            {
+                if (exception == null)
+                {
+                    if (result.size() < 1)
+                    {
+                        Toast toast = Toast
+                                .makeText(
+                                        getApplicationContext(),
+                                        "Invalid Event Id",
+                                        Toast.LENGTH_LONG);
+                        toast.setGravity(
+                                Gravity.TOP
+                                        | Gravity.CENTER_HORIZONTAL,
+                                0, 0);
+                        toast.show();
+                    }
+                    else
+                    {
+                        final Intent i = new Intent(
+                                getApplicationContext(),
+                                EventHome.class);
+                        Events cur;
+                        for (Events res : result)
                         {
-                            System.out
-                                    .println("Error finding item");
+                            cur = res;
+                            Calendar c = Calendar
+                                    .getInstance();
+                            long millisToday = c
+                                    .getTimeInMillis();
+                            long tilEvent = (long) (cur
+                                    .getTime() - millisToday);
+                            // if event passed then exit
+                            if (tilEvent < 0)
+                            {
+                                // if event has passed then delete it
+                                mToDoTable
+                                        .delete(cur,
+                                                new TableDeleteCallback()
+                                                {
+                                                    public void onCompleted(
+                                                            Exception exception,
+                                                            ServiceFilterResponse response)
+                                                    {
+                                                        if (exception == null)
+                                                        {
+                                                            Log.i("CHeck",
+                                                                    "Object deleted");
+                                                            Toast toast = Toast
+                                                                    .makeText(
+                                                                            getApplicationContext(),
+                                                                            "Invalid Event Id",
+                                                                            Toast.LENGTH_LONG);
+                                                            toast.setGravity(
+                                                                    Gravity.TOP
+                                                                            | Gravity.CENTER_HORIZONTAL,
+                                                                    0,
+                                                                    0);
+                                                            toast.show();
+                                                        }
+                                                    }
+                                                });
+                                mEventsToImagesTable
+                                        .where()
+                                        .field("eventCode")
+                                        .eq(eventCode)
+                                        .execute(
+                                                new TableQueryCallback<EventsToImages>()
+                                                {
+                                                    @Override
+                                                    public void onCompleted(
+                                                            List<EventsToImages> result,
+                                                            int count,
+                                                            Exception exception,
+                                                            ServiceFilterResponse response)
+                                                    {
+                                                        if (exception == null)
+                                                        {
+                                                            for (EventsToImages temp : result)
+                                                            {
+                                                                mEventsToImagesTable
+                                                                        .delete(temp,
+                                                                                new TableDeleteCallback()
+                                                                                {
+                                                                                    @Override
+                                                                                    public void onCompleted(
+                                                                                            Exception exception,
+                                                                                            ServiceFilterResponse response)
+                                                                                    {
+                                                                                        if(exception == null)
+                                                                                        {
+                                                                                            Log.i("CHeck", "eventToImages deleted");
+                                                                                        }
+                                                                                    }
+                                                                                });
+                                                                
+                                                                String imageName = temp.getImageName();
+                                                                
+                                                                if(imageName != null && !imageName.equals("deployicon"))
+                                                                {
+                                                                
+                                                                    StorageService mStorageService = new StorageService(
+                                                                            getApplicationContext());
+                                                                    
+                                                                    mStorageService.deleteBlob("deployimages", temp.getImageName());
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                        }
+                                                    }
+                                                });
+                            }
+                            else
+                            {
+                                i.putExtra("title",
+                                        cur.getTitle());
+                                i.putExtra(
+                                        "location",
+                                        cur.getLocation());
+                                i.putExtra("eventtime",
+                                        cur.getTime());
+                                i.putExtra("code", cur
+                                        .getEventCode());
+                                i.putExtra(
+                                        "creator",
+                                        cur.getOwnerId());
+                                i.putExtra(
+                                        "descrip",
+                                        cur.getDescrip());
+                                i.putExtra(
+                                        "username",
+                                        getIntent()
+                                                .getStringExtra(
+                                                        "username"));
+                                mEventsToImagesTable
+                                        .where()
+                                        .field("eventcode")
+                                        .eq(eventCode)
+                                        .execute(
+                                                new TableQueryCallback<EventsToImages>()
+                                                {
+                                                    @Override
+                                                    public void onCompleted(
+                                                            List<EventsToImages> result,
+                                                            int count,
+                                                            Exception exception,
+                                                            ServiceFilterResponse response)
+                                                    {
+                                                        //if no error AND IF THEIR IS RLY A PIC AVAILABLE
+                                                        if (exception == null && result.size()>0)
+                                                        {
+                                                            i.putExtra(
+                                                                    "imagename",
+                                                                    result.get(
+                                                                            0)
+                                                                            .getImageName());
+                                                            startActivity(i);
+                                                        }
+                                                        else
+                                                        {//else proceed without a pic
+                                                            startActivity(i);
+                                                        }
+                                                    }
+                                                });
+                            }
                         }
                     }
-                });
+                }
+                else
+                {
+                    System.out
+                            .println("Error finding item");
+                }
+            }
+        });
     }
 
     public void createEvent(View v)
@@ -444,5 +607,38 @@ public class HomeScreen extends Activity
         // 3. Get the AlertDialog from create()
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+    
+    /***
+     * Broadcast receiver handles blobs being loaded or a new blob being created
+     */
+    private BroadcastReceiver receiver = new BroadcastReceiver()
+    {
+        public void onReceive(Context context,
+                android.content.Intent intent)
+        {
+            String intentAction = intent.getAction();
+            if (intentAction.equals("blob.deleted"))
+            {
+                Log.i("CHeck", "blob image deleted");
+            }
+        }
+    };
+    
+    @Override
+    public void onResume()
+    {
+        super.onResume(); // Always call the superclass method first
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("blob.deleted");
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 }

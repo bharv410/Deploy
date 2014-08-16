@@ -282,8 +282,10 @@ public class StorageService
                             exception.printStackTrace();
                             return;
                         }
-                        // Refetch the blobs from the server
-                        //getBlobsForContainer(containerName);
+                        
+                        Intent broadcast = new Intent();
+                        broadcast.setAction("blob.deleted");
+                        mContext.sendBroadcast(broadcast);
                     }
                 });
     }
