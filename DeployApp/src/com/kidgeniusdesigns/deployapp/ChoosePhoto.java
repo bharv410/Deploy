@@ -72,8 +72,19 @@ public class ChoosePhoto extends Activity
                 Intent intent = new Intent(
                         getApplicationContext(),
                         CreateEvent.class);
+                Intent prev = getIntent();
                 intent.putExtra("username", getIntent()
                         .getStringExtra("username"));
+                intent.putExtra("imageURI", prev
+                        .getStringExtra("imageURI"));
+                intent.putExtra("title", prev
+                        .getStringExtra("title"));
+                intent.putExtra("code", prev
+                        .getStringExtra("code"));
+                intent.putExtra("location", prev
+                        .getStringExtra("location"));
+                intent.putExtra("descrip", prev
+                        .getStringExtra("descrip"));
                 startActivity(intent);
             }
             else

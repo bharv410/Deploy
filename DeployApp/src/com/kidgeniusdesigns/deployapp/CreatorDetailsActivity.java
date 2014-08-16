@@ -5,15 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.telephony.SmsManager;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -56,8 +60,8 @@ public class CreatorDetailsActivity extends FragmentActivity
         final ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
         pager.setAdapter(pageAdapter);
         attendeesList = new ArrayList<String>();
+        attendeesList.add("Some blocked users may still appear on list. Don't worry. If you blocked em then they can't see");
         attendeesList.add("Mr. Miyogi");
-        attendeesList.add("Benjamin Harvey checked in");
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         creator = intent.getStringExtra("creator");
@@ -101,6 +105,9 @@ public class CreatorDetailsActivity extends FragmentActivity
                 .setTabListener(tabListener));
         actionBar.addTab(actionBar.newTab()
                 .setText("Invite Friends")
+                .setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab()
+                .setText("My Events")
                 .setTabListener(tabListener));
 
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
@@ -156,16 +163,6 @@ public class CreatorDetailsActivity extends FragmentActivity
 
     public void checkButtonClick(View v)
     {
-        // SmsManager smsManager = SmsManager.getDefault();
-        // smsManager.sendTextMessage(phoneNo, null, message, null, null);
-
-        Button myButton = (Button) findViewById(R.id.findSelected);
-        myButton.setOnClickListener(new OnClickListener()
-        {
-
-            @Override
-            public void onClick(View v)
-            {
 
                 StringBuffer responseText = new StringBuffer();
                 responseText.append("Sent to:\n");
@@ -176,6 +173,7 @@ public class CreatorDetailsActivity extends FragmentActivity
                     Contact contact = contactList.get(i);
                     if (contact.isChecked())
                     {
+                    	sendSMS(contact.getNum(),"Download the Android app \"Deploy\" and enter event code '"+eventCode+"' to get the private details about "+creator+"s secret event");
                         responseText.append("\n"
                                 + contact.getName());
                     }
@@ -185,10 +183,68 @@ public class CreatorDetailsActivity extends FragmentActivity
                         responseText, Toast.LENGTH_LONG).show();
 
             }
-        });
+    private void sendSMS(String phoneNumber, String message)
+    {        
+        String SENT = "SMS_SENT";
+        String DELIVERED = "SMS_DELIVERED";
 
+        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0,
+            new Intent(SENT), 0);
+
+        PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0,
+            new Intent(DELIVERED), 0);
+
+        //---when the SMS has been sent---
+        registerReceiver(new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(getBaseContext(), "SMS sent", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                        Toast.makeText(getBaseContext(), "Generic failure", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NO_SERVICE:
+                        Toast.makeText(getBaseContext(), "No service", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_NULL_PDU:
+                        Toast.makeText(getBaseContext(), "Null PDU", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case SmsManager.RESULT_ERROR_RADIO_OFF:
+                        Toast.makeText(getBaseContext(), "Radio off", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        }, new IntentFilter(SENT));
+
+        //---when the SMS has been delivered---
+        registerReceiver(new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context arg0, Intent arg1) {
+                switch (getResultCode())
+                {
+                    case Activity.RESULT_OK:
+                        Toast.makeText(getBaseContext(), "SMS delivered", 
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        Toast.makeText(getBaseContext(), "SMS not delivered", 
+                                Toast.LENGTH_SHORT).show();
+                        break;                        
+                }
+            }
+        }, new IntentFilter(DELIVERED));        
+
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);        
     }
-
     public void saveEvent(View v)
     {
         editTitle = (EditText) findViewById(R.id.editEventTitle);

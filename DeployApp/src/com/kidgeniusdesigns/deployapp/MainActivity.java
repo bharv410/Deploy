@@ -43,11 +43,11 @@ public class MainActivity extends FragmentActivity implements
         setContentView(R.layout.activity_main);
         
         // dummy username for testing purposes
-        Intent i = new Intent(getApplicationContext(),
-                HomeScreen.class);
-        i.putExtra("username", "Benjamin Harvey");
-        username = "Benjamin Harvey";
-        startActivity(i);
+//        Intent i = new Intent(getApplicationContext(),
+//                HomeScreen.class);
+//        i.putExtra("username", "Benjamin Harvey");
+//        username = "Benjamin Harvey";
+//        startActivity(i);
 
         
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
