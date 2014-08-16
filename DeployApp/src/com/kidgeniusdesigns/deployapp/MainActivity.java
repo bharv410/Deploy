@@ -50,6 +50,7 @@ public class MainActivity extends FragmentActivity implements
         username = "Tester tester";
         startActivity(i);
         */
+        
 
         
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
