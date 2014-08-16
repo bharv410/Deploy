@@ -37,9 +37,18 @@ public class MainActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        
+        // dummy username for testing purposes
+        Intent i = new Intent(getApplicationContext(),
+                HomeScreen.class);
+        i.putExtra("username", "Tester tester");
+        username = "Tester tester";
+        startActivity(i);
 
+        
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
         mSignInButton.setOnClickListener(this);
         if (savedInstanceState != null)

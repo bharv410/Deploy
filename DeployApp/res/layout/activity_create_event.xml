@@ -59,7 +59,8 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="Event title"
-                    android:imeOptions="actionNext"
+                    android:singleLine="true" 
+                    android:nextFocusDown="@+id/eventCode"
                     android:paddingBottom="5dp" />
             
                 <EditText
@@ -68,7 +69,8 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:hint="Event code"
-                    android:imeOptions="actionNext"
+                    android:singleLine="true" 
+                    android:nextFocusDown="@+id/autoCompleteTextView1"
                     android:inputType="textPassword"
                     android:paddingBottom="5dp" />
                 
