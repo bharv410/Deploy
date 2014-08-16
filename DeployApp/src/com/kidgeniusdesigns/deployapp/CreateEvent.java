@@ -31,6 +31,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -42,7 +43,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.coreform.open.android.formidablevalidation.RegExpressionValueValidator;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
@@ -112,6 +112,10 @@ public class CreateEvent extends FragmentActivity implements
         descripHints[2] = "You are one of the few that hold the event code to meet with our surprise music artist who has agreed to sign some autographs.";
         descripHints[3] = "Whats up bud. Could you drop the kids off at wawas. Easily get directions or add to your calendar through this app.";
 
+        //hide keyboard at first
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        
+        
         eventTitle = (EditText) findViewById(R.id.eventTitle);
 
         eventCode = (EditText) findViewById(R.id.eventCode);
@@ -155,15 +159,15 @@ public class CreateEvent extends FragmentActivity implements
             // System.out.print("Coudnt get table");
         }
 
-        mValidationManager = new ValidationManager(this);
-        mValidationManager.add("eventTitleError",
-                new RegExpressionValueValidator(eventCode,
-                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
-                        "please enter event code."));
-        mValidationManager.add("eventTitleError",
-                new RegExpressionValueValidator(eventTitle,
-                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
-                        "please enter event title."));
+//        mValidationManager = new ValidationManager(this);
+//        mValidationManager.add("eventCodeError",
+//                new RegExpressionValueValidator(eventCode,
+//                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
+//                        "please enter event code."));
+//        mValidationManager.add("eventTitleError",
+//                new RegExpressionValueValidator(eventTitle,
+//                        "^[a-zA-Z0-9\\-'\\s]{3,}$",
+//                        "please enter event title."));
     }
 
     public class Item
@@ -203,10 +207,10 @@ public class CreateEvent extends FragmentActivity implements
 
     public void saveEvent(View v)
     {
-        if (mValidationManager.validateAllAndSetError())
-        {
+//        if (mValidationManager.validateAllAndSetError())
+//        {
             uploadImage();
-        }
+        //}
     }
 
     public void uploadImage()
@@ -217,6 +221,8 @@ public class CreateEvent extends FragmentActivity implements
             
             imageName = getIntent().getStringExtra("username") + imageURI +
                     cal.getTimeInMillis();
+            
+            imageName = imageName.replaceAll("[^A-Za-z0-9]", "");
             
             mStorageService.getSasForNewBlob("deployimages",
                     imageName);

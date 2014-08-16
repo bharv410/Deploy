@@ -244,7 +244,8 @@ public class HomeScreen extends Activity
                                                                     Exception exception,
                                                                     ServiceFilterResponse response)
                                                             {
-                                                                if (exception == null)
+                                                            	//if no error AND IF THEIR IS RLY A PIC AVAILABLE
+                                                                if (exception == null && result.size()>0)
                                                                 {
                                                                     i.putExtra(
                                                                             "imagename",
@@ -254,7 +255,8 @@ public class HomeScreen extends Activity
                                                                     startActivity(i);
                                                                 }
                                                                 else
-                                                                {
+                                                                {//else proceed without a pic
+                                                                	startActivity(i);
                                                                 }
                                                             }
                                                         });
