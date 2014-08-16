@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kidgeniusdesigns.realdeploy.R;
@@ -33,6 +34,10 @@ public class AttendeesFrag extends ListFragment
                 CreatorDetailsActivity.attendeesList);
         setListAdapter(adapter);
         ListView listView = getListView();
+        
+        
+        TextView tv = (TextView)getActivity().findViewById(R.id.listHeaderText);
+        tv.setText("Attendees:");
         // Create a ListView-specific touch listener. ListViews are given special treatment because
         // by default they handle touches for their list items... i.e. they're in charge of drawing
         // the pressed state (the list selector), handling list item clicks, etc.

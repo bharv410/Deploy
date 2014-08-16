@@ -33,7 +33,8 @@
         android:layout_alignRight="@+id/eventCode"
         android:layout_below="@+id/eventCode"
         android:background="@drawable/checkinbutton"
-        android:onClick="goToEvent" />
+        android:onClick="goToEvent"
+        />
 
     <ProgressBar
         android:id="@+id/progressBar1"
@@ -49,7 +50,7 @@
         android:layout_alignLeft="@+id/button1"
         android:layout_alignRight="@+id/imageView1"
         android:layout_below="@+id/imageView1"
-        android:background="@drawable/createevent"
+        android:background="@drawable/createventbutton"
         android:onClick="createEvent" />
 
     <ImageView

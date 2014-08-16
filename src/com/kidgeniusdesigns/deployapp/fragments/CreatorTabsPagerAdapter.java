@@ -31,6 +31,8 @@ public class CreatorTabsPagerAdapter extends
                 return new ContactsList();
             case 3:
             	return new MyEventsFrag();
+            case 4:
+            	return new DeploySpecialsFrag();
         }
 
         return null;

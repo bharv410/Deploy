@@ -109,6 +109,9 @@ public class CreatorDetailsActivity extends FragmentActivity
         actionBar.addTab(actionBar.newTab()
                 .setText("My Events")
                 .setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab()
+                .setText("Deploy Specials")
+                .setTabListener(tabListener));
 
         pager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener()
         {

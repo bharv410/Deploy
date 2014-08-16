@@ -16,7 +16,7 @@
             android:layout_height="65dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:background="@drawable/startroute"
+            android:background="@drawable/startroutebutton"
             android:onClick="startRoute" />
 
 </RelativeLayout>

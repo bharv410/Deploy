@@ -6,11 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kidgeniusdesigns.realdeploy.R;
 
-public class MyEventsFrag extends ListFragment
+public class DeploySpecialsFrag  extends ListFragment
 {
 	
     @Override
@@ -27,16 +29,24 @@ public class MyEventsFrag extends ListFragment
     public void onActivityCreated(Bundle saved)
     {
         super.onActivityCreated(saved);
-        String[] comingSoon= new String[30];
-        for(int i=0; i<comingSoon.length; i++){
-        	comingSoon[i]="Coming Soon";
-        }
+        String[] comingSoon= new String[4];
+
+        	comingSoon[0]="Security";
+        	comingSoon[1]="Bartenders (21+)";
+        	comingSoon[2]="Models";
+        	comingSoon[3]="Drivers (Uber)";
+        	
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 getActivity().getApplicationContext(),
                 R.layout.simplest_list_item,comingSoon);
         setListAdapter(adapter);
         
         TextView tv = (TextView)getActivity().findViewById(R.id.listHeaderText);
-        tv.setText("My Events: ");
+        tv.setText("Request:");
+    }
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        Toast.makeText(getActivity(), "Coming soon!!", Toast.LENGTH_SHORT);
     }
 }
