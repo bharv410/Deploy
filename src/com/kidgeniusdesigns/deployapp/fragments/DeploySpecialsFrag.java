@@ -47,6 +47,6 @@ public class DeploySpecialsFrag  extends ListFragment
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        Toast.makeText(getActivity(), "Coming soon!!", Toast.LENGTH_SHORT);
+        Toast.makeText(getActivity(), "Coming soon!!", Toast.LENGTH_SHORT).show();
     }
 }

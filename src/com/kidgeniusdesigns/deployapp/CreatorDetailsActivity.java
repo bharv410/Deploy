@@ -22,11 +22,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
-import com.kidgeniusdesigns.deployapp.fragments.Attendee;
-import com.kidgeniusdesigns.deployapp.fragments.BlockedMembers;
-import com.kidgeniusdesigns.deployapp.fragments.CreatorTabsPagerAdapter;
-import com.kidgeniusdesigns.deployapp.fragments.Events;
+import com.kidgeniusdesigns.deployapp.fragments.ContactsList;
 import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.realdeploy.adapters.CreatorTabsPagerAdapter;
+import com.kidgeniusdesigns.realdeploy.model.Attendee;
+import com.kidgeniusdesigns.realdeploy.model.BlockedMembers;
+import com.kidgeniusdesigns.realdeploy.model.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
@@ -60,7 +61,6 @@ public class CreatorDetailsActivity extends FragmentActivity
         final ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
         pager.setAdapter(pageAdapter);
         attendeesList = new ArrayList<String>();
-        attendeesList.add("Some blocked users may still appear on list. Don't worry. If you blocked em then they can't see");
         attendeesList.add("Mr. Miyogi");
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
@@ -175,10 +175,13 @@ public class CreatorDetailsActivity extends FragmentActivity
                 {
                     Contact contact = contactList.get(i);
                     if (contact.isChecked())
-                    {
+                    {try{
                     	sendSMS(contact.getNum(),"Download the Android app \"Deploy\" and enter event code '"+eventCode+"' to get the private details about "+creator+"s secret event");
-                        responseText.append("\n"
-                                + contact.getName());
+                       
+                    }catch(Exception e){
+                    	
+                    }
+                    responseText.append("\n"+ contact.getName());
                     }
                 }
 
@@ -309,7 +312,6 @@ public class CreatorDetailsActivity extends FragmentActivity
                 });
 
     }
-    
     public void blockFromList(String username){
     	String currentEventCode=eventCode;
     	

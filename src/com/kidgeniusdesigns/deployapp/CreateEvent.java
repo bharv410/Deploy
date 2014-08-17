@@ -45,9 +45,11 @@ import android.widget.Toast;
 import com.coreform.open.android.formidablevalidation.ValidationManager;
 import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
-import com.kidgeniusdesigns.deployapp.fragments.Events;
 import com.kidgeniusdesigns.deployapp.fragments.TimePickerFragment;
 import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.realdeploy.helpers.StorageApplication;
+import com.kidgeniusdesigns.realdeploy.helpers.StorageService;
+import com.kidgeniusdesigns.realdeploy.model.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
@@ -376,6 +378,7 @@ public class CreateEvent extends FragmentActivity implements
                                         HomeScreen.class);
                                 i.putExtra("eventcode",
                                         entity.getEventCode());
+                                i.putExtra("username", MainActivity.username);
                                 startActivity(i);
                             }
                             else

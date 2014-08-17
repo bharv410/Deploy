@@ -3,7 +3,6 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,7 +12,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,11 +22,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.realdeploy.R;
-import com.kidgeniusdesigns.deployapp.CreateEvent.ImageUploaderTask;
-import com.kidgeniusdesigns.deployapp.fragments.BlockedMembers;
-import com.kidgeniusdesigns.deployapp.fragments.Events;
+import com.kidgeniusdesigns.realdeploy.helpers.StorageService;
+import com.kidgeniusdesigns.realdeploy.model.BlockedMembers;
+import com.kidgeniusdesigns.realdeploy.model.Events;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
@@ -56,29 +53,29 @@ public class HomeScreen extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_home_screen);
         
-        MainActivity.timesOnHomeScreen++;
-        if(MainActivity.timesOnHomeScreen>1 && MainActivity.timesOnHomeScreen<4){
-        	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-    				HomeScreen.this);
-     
-    			// set title
-    			alertDialogBuilder.setTitle("Congrats on create an event!");
-     
-    			// set dialog message
-    			alertDialogBuilder
-    				.setMessage("-Edit details\n-Invite contacts\n-See who viewed\n Just type '"+ getIntent().getStringExtra("eventcode") +"'\nand click the green settings gear")
-    				.setCancelable(false)
-    				.setPositiveButton("Got it!",new DialogInterface.OnClickListener() {
-    					public void onClick(DialogInterface dialog,int id) {
-    						dialog.cancel();
-    					}
-    				  });
-    				// create alert dialog
-    				AlertDialog alertDialog = alertDialogBuilder.create();
-     
-    				// show it
-    				alertDialog.show();
-        }
+//        MainActivity.timesOnHomeScreen++;
+//        if(MainActivity.timesOnHomeScreen>1 && MainActivity.timesOnHomeScreen<4){
+//        	AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+//    				HomeScreen.this);
+//     
+//    			// set title
+//    			alertDialogBuilder.setTitle("Congrats on create an event!");
+//     
+//    			// set dialog message
+//    			alertDialogBuilder
+//    				.setMessage("-Edit details\n-Invite contacts\n-See who viewed\n Just type '"+ getIntent().getStringExtra("eventcode") +"'\nand click the green settings gear")
+//    				.setCancelable(false)
+//    				.setPositiveButton("Got it!",new DialogInterface.OnClickListener() {
+//    					public void onClick(DialogInterface dialog,int id) {
+//    						dialog.cancel();
+//    					}
+//    				  });
+//    				// create alert dialog
+//    				AlertDialog alertDialog = alertDialogBuilder.create();
+//     
+//    				// show it
+//    				alertDialog.show();
+//        }
         eventCode = (EditText) findViewById(R.id.eventCode);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
         mProgressBar.setVisibility(ProgressBar.GONE);
@@ -140,6 +137,8 @@ public class HomeScreen extends Activity
                                                 | Gravity.CENTER_HORIZONTAL,
                                         0, 0);
                                 toast.show();
+                    		}else{
+                    			findItem(enteredCode);
                     		}
                     	}
                     	

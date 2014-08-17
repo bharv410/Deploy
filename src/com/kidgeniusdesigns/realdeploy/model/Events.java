@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.deployapp.fragments;
+package com.kidgeniusdesigns.realdeploy.model;
 
 public class Events
 {

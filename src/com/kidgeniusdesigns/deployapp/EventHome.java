@@ -34,10 +34,11 @@ import android.widget.Toast;
 import com.bugsense.trace.BugSenseHandler;
 import com.google.android.maps.GeoPoint;
 import com.google.gson.JsonObject;
-import com.kidgeniusdesigns.deployapp.fragments.Attendee;
 import com.kidgeniusdesigns.deployapp.fragments.EventInfo;
-import com.kidgeniusdesigns.deployapp.fragments.TabsPagerAdapter;
 import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.realdeploy.adapters.TabsPagerAdapter;
+import com.kidgeniusdesigns.realdeploy.helpers.StorageService;
+import com.kidgeniusdesigns.realdeploy.model.Attendee;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
@@ -158,6 +159,7 @@ public class EventHome extends FragmentActivity
             String intentAction = intent.getAction();
             if (intentAction.equals("blob.loaded"))
             {
+            	try{
                 // Load the image using the SAS URL
                 JsonObject blob = mStorageService
                         .getLoadedBlob();
@@ -165,6 +167,9 @@ public class EventHome extends FragmentActivity
                         .toString();
                 sasUrl = sasUrl.replace("\"", "");
                 (new ImageFetcherTask(sasUrl)).execute();
+            	}catch(Exception e){
+            		System.out.println("Error retrieving image");
+            	}
             }
 
         }
@@ -208,6 +213,7 @@ public class EventHome extends FragmentActivity
         {
             if (loaded)
             {
+            	try{
                 ImageView eventPhoto = (ImageView) findViewById(R.id.eventPhoto);
                 eventPhoto.setImageBitmap(mBitmap);
                 
@@ -215,6 +221,9 @@ public class EventHome extends FragmentActivity
                 
                 if(mProgressBar != null)
                     mProgressBar.setVisibility(ProgressBar.GONE);
+            	}catch(Exception e){
+            		System.out.println("Image Error");
+            	}
             }
         }
     }

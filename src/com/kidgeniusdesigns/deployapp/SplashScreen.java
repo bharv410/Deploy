@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.realdeploy;
+package com.kidgeniusdesigns.deployapp;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
 
-import com.kidgeniusdesigns.deployapp.MainActivity;
+import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.realdeploy.R.layout;
 
 public class SplashScreen extends Activity {
 	 

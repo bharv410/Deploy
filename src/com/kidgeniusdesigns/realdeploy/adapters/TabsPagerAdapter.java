@@ -1,4 +1,7 @@
-package com.kidgeniusdesigns.deployapp.fragments;
+package com.kidgeniusdesigns.realdeploy.adapters;
+
+import com.kidgeniusdesigns.deployapp.fragments.EventInfo;
+import com.kidgeniusdesigns.deployapp.fragments.MapFragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

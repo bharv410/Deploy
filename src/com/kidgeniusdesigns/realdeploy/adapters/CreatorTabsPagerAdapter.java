@@ -1,12 +1,14 @@
-package com.kidgeniusdesigns.deployapp.fragments;
+package com.kidgeniusdesigns.realdeploy.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.kidgeniusdesigns.deployapp.AttendeesFrag;
-import com.kidgeniusdesigns.deployapp.ContactsList;
-import com.kidgeniusdesigns.deployapp.EditEventFrag;
+import com.kidgeniusdesigns.deployapp.fragments.AttendeesFrag;
+import com.kidgeniusdesigns.deployapp.fragments.ContactsList;
+import com.kidgeniusdesigns.deployapp.fragments.DeploySpecialsFrag;
+import com.kidgeniusdesigns.deployapp.fragments.EditEventFrag;
+import com.kidgeniusdesigns.deployapp.fragments.MyEventsFrag;
 
 public class CreatorTabsPagerAdapter extends
         FragmentPagerAdapter
@@ -42,6 +44,6 @@ public class CreatorTabsPagerAdapter extends
     public int getCount()
     {
         // get item count - equal to number of tabs
-        return 4;
+        return 5;
     }
 }

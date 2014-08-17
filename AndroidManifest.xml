@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.kidgeniusdesigns.realdeploy"
-    android:versionCode="8"
-    android:versionName="8.0" >
+    android:versionCode="14"
+    android:versionName="10.4" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -102,7 +102,7 @@ Google Maps Android API v2, but are recommended.
             android:windowSoftInputMode="stateHidden" >
         </activity>
         <activity
-            android:name=".SplashScreen"
+            android:name="com.kidgeniusdesigns.deployapp.SplashScreen"
             android:label="@string/title_activity_splash_screen"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo" >

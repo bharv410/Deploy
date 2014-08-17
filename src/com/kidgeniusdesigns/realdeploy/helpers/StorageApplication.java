@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.realdeploy.helpers;
 
 import android.app.Application;
 import android.content.Context;

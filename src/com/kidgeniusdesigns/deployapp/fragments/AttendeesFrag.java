@@ -1,5 +1,7 @@
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.deployapp.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
@@ -10,7 +12,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kidgeniusdesigns.deployapp.CreatorDetailsActivity;
 import com.kidgeniusdesigns.realdeploy.R;
+import com.kidgeniusdesigns.realdeploy.helpers.SwipeDismissListViewTouchListener;
 
 public class AttendeesFrag extends ListFragment
 {
@@ -54,9 +58,37 @@ public class AttendeesFrag extends ListFragment
                             @Override
                             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
-                                	String name=adapter.getItem(position);
-                                	adapter.remove(name);
-                                	((CreatorDetailsActivity)getActivity()).blockFromList(name);
+                                	final String name=adapter.getItem(position);
+                               AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                            				getActivity());
+                             
+                            			// set title
+                            			alertDialogBuilder.setTitle("Block "+name+"?");
+                             
+                            			// set dialog message
+                            			alertDialogBuilder
+                            				.setMessage("Permanently block "+name+" from the event?\n\nTheir name might still show up, but trust me, they can never see again.")
+                            				.setCancelable(false)
+                            				.setPositiveButton("Block them!",new DialogInterface.OnClickListener() {
+                            					public void onClick(DialogInterface dialog,int id) {
+                            						adapter.remove(name);
+                                                	((CreatorDetailsActivity)getActivity()).blockFromList(name);
+                            						dialog.cancel();
+                            					}
+                            				  })
+                            				  .setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+                            					public void onClick(DialogInterface dialog,int id) {
+                            						dialog.cancel();
+                            					}
+                            				  });
+                            			
+                            			
+                            				// create alert dialog
+                            				AlertDialog alertDialog = alertDialogBuilder.create();
+                             
+                            				// show it
+                            				alertDialog.show();
+                                
                                 }
                                 
                                 adapter.notifyDataSetChanged();

@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.deployapp.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
+import com.kidgeniusdesigns.deployapp.CreatorDetailsActivity;
+import com.kidgeniusdesigns.deployapp.EventHome;
 import com.kidgeniusdesigns.realdeploy.R;
 
 public class EditEventFrag extends Fragment

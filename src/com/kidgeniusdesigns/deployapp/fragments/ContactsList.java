@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.deployapp.fragments;
 
 import java.util.ArrayList;
 
@@ -17,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.kidgeniusdesigns.deployapp.Contact;
 import com.kidgeniusdesigns.realdeploy.R;
 
 public class ContactsList extends Fragment

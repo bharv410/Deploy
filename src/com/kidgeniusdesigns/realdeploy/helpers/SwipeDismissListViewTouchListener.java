@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.realdeploy.helpers;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
