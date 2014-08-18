@@ -1,4 +1,4 @@
-package com.kidgeniusdesigns.deployapp;
+package com.kidgeniusdesigns.realdeploy.model;
 
 public class EventsToImages
 {
