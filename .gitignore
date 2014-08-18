@@ -17,6 +17,18 @@ DeployApp/.classpath
 DeployApp/.project
 DeployApp/project.properties
 DeployApp/proguard-project.txt
+.metadata
+.gradle
+bin/
+tmp/
+local.properties
+.settings/
+.loadpath
+.classpath
+.project
+project.properties
+proguard-project.txt
+
 
 # External tool builders
 .externalToolBuilders/
