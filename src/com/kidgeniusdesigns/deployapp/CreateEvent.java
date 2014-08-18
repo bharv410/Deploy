@@ -47,9 +47,9 @@ import com.google.gson.JsonObject;
 import com.kidgeniusdesigns.deployapp.fragments.DatePickerFragment;
 import com.kidgeniusdesigns.deployapp.fragments.TimePickerFragment;
 import com.kidgeniusdesigns.realdeploy.R;
-import com.kidgeniusdesigns.realdeploy.helpers.StorageApplication;
 import com.kidgeniusdesigns.realdeploy.helpers.StorageService;
 import com.kidgeniusdesigns.realdeploy.model.Events;
+import com.kidgeniusdesigns.realdeploy.model.EventsToImages;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
@@ -184,9 +184,7 @@ public class CreateEvent extends FragmentActivity implements
 
             mToDoTable = mClient.getTable(Events.class);
 
-            mStorageService = new StorageApplication(
-                    getApplicationContext())
-                    .getStorageService();
+            mStorageService = new StorageService(this);
         }
         catch (Exception e)
         {

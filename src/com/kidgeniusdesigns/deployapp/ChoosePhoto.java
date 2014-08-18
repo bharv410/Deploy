@@ -1,9 +1,5 @@
 package com.kidgeniusdesigns.deployapp;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Enumeration;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -16,17 +12,6 @@ public class ChoosePhoto extends Activity
     public void onCreate(Bundle b)
     {
         super.onCreate(b);
-        /*
-        Thread.currentThread().setContextClassLoader(new ClassLoader() {
-            @Override
-            public Enumeration<URL> getResources(String resName) throws IOException {
-                Log.i("Debug", "Stack trace of who uses " +
-                        "Thread.currentThread().getContextClassLoader()." +
-                        "getResources(String resName):", new Exception());
-                return super.getResources(resName);
-            }
-        });
-        */
 
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
         i.setType("image/*");
