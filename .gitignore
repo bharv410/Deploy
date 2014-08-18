@@ -19,6 +19,7 @@ DeployApp/project.properties
 DeployApp/proguard-project.txt
 .metadata
 .gradle
+gen/
 bin/
 tmp/
 local.properties
