@@ -197,4 +197,11 @@ public class MainActivity extends FragmentActivity implements
     {
         mGoogleApiClient.connect();
     }
+    
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+        startActivity(intent);
+    }
 }

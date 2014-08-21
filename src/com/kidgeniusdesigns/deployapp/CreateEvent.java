@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import org.json.JSONArray;
@@ -58,6 +59,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class CreateEvent extends FragmentActivity implements
         OnItemClickListener
@@ -179,8 +181,7 @@ public class CreateEvent extends FragmentActivity implements
         {
             mClient = new MobileServiceClient(
                     "https://droiddemo.azure-mobile.net/",
-                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
-                    .withFilter(new ProgressFilter());
+                    "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this);
 
             mToDoTable = mClient.getTable(Events.class);
 
@@ -276,9 +277,51 @@ public class CreateEvent extends FragmentActivity implements
     	
 //        if (mValidationManager.validateAllAndSetError())
 //        {
-            uploadImage();
+            //uploadImage();
         //}
+    	
+    	final String eventcode = eventCode.getText().toString();
+    	
+    	mToDoTable.where().field("eventcode").eq(eventcode)
+        .execute(new TableQueryCallback<Events>()
+                {
+
+                    @Override
+                    public void onCompleted(List<Events> result,
+                            int count, Exception exception,
+                            ServiceFilterResponse response)
+                    {
+                        if(exception == null)
+                        {
+                            if(result.size() == 0)
+                            {
+                                uploadImage();
+                            }
+                            else
+                            {
+                                if(mProgressBar != null)
+                                    mProgressBar
+                                        .setVisibility(ProgressBar.GONE);
+                                
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "The event code " + eventcode + 
+                                        " already exists, please choose a different event code",
+                                        Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                        else
+                        {
+                            exception.printStackTrace();
+                        }
+                        
+                    }
+            
+                });
     }
+    
+        
 
     public void uploadImage()
     {
@@ -390,6 +433,14 @@ public class CreateEvent extends FragmentActivity implements
                         }
                     });
         }
+    }
+    
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+        intent.putExtra("username", getIntent().getStringExtra("username"));
+        startActivity(intent);
     }
 
     /***

@@ -329,4 +329,12 @@ public class CreatorDetailsActivity extends FragmentActivity
     	      }
     	});
     }
+    
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+        intent.putExtra("username", getIntent().getStringExtra("username"));
+        startActivity(intent);
+    }
 }

@@ -38,5 +38,12 @@ public class SplashScreen extends Activity {
             }
         }, SPLASH_TIME_OUT);
     }
+    
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+        startActivity(intent);
+    }
  
 }
