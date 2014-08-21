@@ -608,6 +608,13 @@ public class HomeScreen extends Activity
         dialog.show();
     }
     
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), SplashScreen.class);
+        startActivity(intent);
+    }
+    
     /***
      * Broadcast receiver handles blobs being loaded or a new blob being created
      */

@@ -147,6 +147,14 @@ public class EventHome extends FragmentActivity
         });
         setAttending(" checkedin");
     }
+    
+    @Override
+    public void onBackPressed()
+    {
+        Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+        intent.putExtra("username", getIntent().getStringExtra("username"));
+        startActivity(intent);
+    }
 
     /***
      * Broadcast receiver handles blobs being loaded or a new blob being created
