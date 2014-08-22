@@ -282,43 +282,59 @@ public class CreateEvent extends FragmentActivity implements
     	
     	final String eventcode = eventCode.getText().toString();
     	
-    	mToDoTable.where().field("eventcode").eq(eventcode)
-        .execute(new TableQueryCallback<Events>()
-                {
-
-                    @Override
-                    public void onCompleted(List<Events> result,
-                            int count, Exception exception,
-                            ServiceFilterResponse response)
+    	if(eventcode.equals("clearupoldevents") || eventcode.equals("clearupfloatevents"))
+    	{
+    	    Toast.makeText(
+                    getApplicationContext(),
+                    "The event code " + eventcode + 
+                    " already exists, please choose a different event code",
+                    Toast.LENGTH_LONG)
+                    .show();
+    	    
+    	    if(mProgressBar != null)
+    	        mProgressBar.setVisibility(ProgressBar.GONE);
+    	}
+    	else
+    	{
+    	
+        	mToDoTable.where().field("eventcode").eq(eventcode)
+            .execute(new TableQueryCallback<Events>()
                     {
-                        if(exception == null)
+    
+                        @Override
+                        public void onCompleted(List<Events> result,
+                                int count, Exception exception,
+                                ServiceFilterResponse response)
                         {
-                            if(result.size() == 0)
+                            if(exception == null)
                             {
-                                uploadImage();
+                                if(result.size() == 0)
+                                {
+                                    uploadImage();
+                                }
+                                else
+                                {
+                                    if(mProgressBar != null)
+                                        mProgressBar
+                                            .setVisibility(ProgressBar.GONE);
+                                    
+                                    Toast.makeText(
+                                            getApplicationContext(),
+                                            "The event code " + eventcode + 
+                                            " already exists, please choose a different event code",
+                                            Toast.LENGTH_LONG)
+                                            .show();
+                                }
                             }
                             else
                             {
-                                if(mProgressBar != null)
-                                    mProgressBar
-                                        .setVisibility(ProgressBar.GONE);
-                                
-                                Toast.makeText(
-                                        getApplicationContext(),
-                                        "The event code " + eventcode + 
-                                        " already exists, please choose a different event code",
-                                        Toast.LENGTH_LONG)
-                                        .show();
+                                exception.printStackTrace();
                             }
+                            
                         }
-                        else
-                        {
-                            exception.printStackTrace();
-                        }
-                        
-                    }
-            
-                });
+                
+                    });
+    	}
     }
     
         
