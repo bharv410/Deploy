@@ -3,6 +3,7 @@ package com.kidgeniusdesigns.deployapp;
 import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -43,6 +44,7 @@ public class HomeScreen extends Activity
     private MobileServiceTable<Events> mToDoTable;
     private ProgressBar mProgressBar;
     private String enteredCode;
+    private StorageService mStorageService;
     private MobileServiceTable<EventsToImages> mEventsToImagesTable;
     ProgressDialog barProgressDialog;
 
@@ -86,7 +88,7 @@ public class HomeScreen extends Activity
                     "uGrjosMeSdfQaUqCPEMSgKJhADIqFY34", this)
                     .withFilter(new ProgressFilter());
             mToDoTable = mClient.getTable(Events.class);
-            StorageService mStorageService = new StorageService(
+            mStorageService = new StorageService(
                     getApplicationContext());
             MobileServiceClient mImagesClient = mStorageService
                     .getMobileServiceClient();
@@ -165,6 +167,10 @@ public class HomeScreen extends Activity
         if(eventCode.equals("clearupoldevents"))
         {
             clearUpOldEvents();
+        }
+        else if(eventCode.equals("clearupfloatevents"))
+        {
+            clearUpFloatEvents();
         }
         else
         {
@@ -255,10 +261,6 @@ public class HomeScreen extends Activity
                                                             
                                                             if(imageName != null && !imageName.equals("deployicon"))
                                                             {
-                                                            
-                                                                StorageService mStorageService = new StorageService(
-                                                                        getApplicationContext());
-                                                                
                                                                 mStorageService.deleteBlob("deployimages", temp.getImageName());
                                                             }
                                                         }
@@ -275,6 +277,56 @@ public class HomeScreen extends Activity
                     }
             
                 });
+    }
+    
+    public void clearUpFloatEvents()
+    {
+        if(mProgressBar != null)
+            mProgressBar.setVisibility(ProgressBar.VISIBLE);
+        
+        mStorageService.getBlobsForContainer("deployimages");
+    }
+    
+    public void deleteFloatingBlobs()
+    {
+        List<Map<String, String>> blobNames = mStorageService.getLoadedBlobNames();
+        
+        for(int i = 0; i < blobNames.size(); i++)
+        {
+            final String blobName = blobNames.get(i).get("BlobName");
+            
+            if(!blobName.equals("deployicon"))
+            {
+                mEventsToImagesTable.where().field("imagename").eq(blobName)
+                .execute(new TableQueryCallback<EventsToImages>()
+                        {
+    
+                            @Override
+                            public void onCompleted(
+                                    List<EventsToImages> result,
+                                    int count, Exception exception,
+                                    ServiceFilterResponse response)
+                            {
+                                if(exception == null)
+                                {
+                                    if(result.size() == 0)
+                                    {
+                                        mStorageService.deleteBlob("deployimages", blobName);
+                                    }
+                                }
+                                else
+                                {
+                                    exception.printStackTrace();
+                                }
+                                
+                            }
+                    
+                        });
+            }
+        }
+        
+        if(mProgressBar != null)
+            mProgressBar.setVisibility(ProgressBar.GONE);
     }
     
     public void findEventCode(final String eventCode)
@@ -628,6 +680,10 @@ public class HomeScreen extends Activity
             {
                 Log.i("CHeck", "blob image deleted");
             }
+            else if(intentAction.equals("blobs.loaded"))
+            {
+                deleteFloatingBlobs();
+            }
         }
     };
     
@@ -638,6 +694,7 @@ public class HomeScreen extends Activity
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("blob.deleted");
+        filter.addAction("blobs.loaded");
         registerReceiver(receiver, filter);
     }
 

@@ -51,6 +51,8 @@ Google Maps Android API v2, but are recommended.
             
             <intent-filter>
                 <action android:name="blob.deleted" >
+                </action>
+                <action android:name="blobs.loaded" >
                 </action>              
             </intent-filter>
         </activity>
