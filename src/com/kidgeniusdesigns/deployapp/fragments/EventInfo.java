@@ -21,7 +21,7 @@ import com.kidgeniusdesigns.realdeploy.R;
 public class EventInfo extends Fragment
 {
     static TextView partyCountdown, titleView, descrView,
-            dateView, creatorView, startTimeView;
+            dateView, /*creatorView,*/ startTimeView;
     public static ImageButton atButton;
 
     public static ImageView eventPhoto;
@@ -49,9 +49,11 @@ public class EventInfo extends Fragment
                 R.id.realDateView);
         dateView.setText(getDate(EventHome.cd,
                 "EEE, MMM d, ''yy"));
+        /*
         creatorView = (TextView) getActivity().findViewById(
                 R.id.partyCreator);
         creatorView.setText("By:" + EventHome.creator);
+        */
         atButton = (ImageButton) getActivity().findViewById(
                 R.id.attendingButton);
         descrView = (TextView) getActivity().findViewById(
